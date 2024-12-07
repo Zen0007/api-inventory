@@ -3,6 +3,10 @@ import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+const String endpoint = 'endpoint';
+const String warning = 'warning';
+const String valueEdnpoint = "LOGIN";
+
 Future<void> login({
   required dynamic data,
   required WebSocketChannel socket,
@@ -16,7 +20,11 @@ Future<void> login({
 
     if (userName == null || password == null) {
       socket.sink.add(json.encode(
-          {"endpoint": "LOGIN", "message": "user name or password is field"}));
+        {
+          endpoint: valueEdnpoint,
+          warning: "user name or password is field",
+        },
+      ));
       return;
     }
 
@@ -32,22 +40,23 @@ Future<void> login({
     final jwt = JWT(payload);
     final token = jwt.sign(SecretKey(secretKey));
 
-    final findNameAdmin = await collection.findOne(where
-        .eq('$userName.name', userName)
-        .eq("$userName.password", password));
-    print(userName);
-    print(password);
-    print(findNameAdmin);
+    final findNameAdmin = await collection.findOne(
+      where.eq('$userName.name', userName).eq(
+            "$userName.password",
+            password,
+          ),
+    );
+
     if (findNameAdmin != null) {
       socket.sink.add(
         json.encode(
-          {"endpoint": "LOGIN", "token": token},
+          {endpoint: valueEdnpoint, "token": token},
         ),
       );
       return;
     } else {
-      socket.sink
-          .add(json.encode({"endpoint": "LOGIN", "message": "user not found"}));
+      socket.sink.add(
+          json.encode({endpoint: valueEdnpoint, warning: "user not found"}));
       return;
     }
   } catch (e, s) {

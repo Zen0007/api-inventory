@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+const String endpoint = 'endpoint';
+const String warning = 'warning';
+const String valueEdnpoint = "NEWITEM";
+
 Future<void> addItemToInventory(
     {required WebSocketChannel socket,
     dynamic payload,
@@ -21,7 +25,7 @@ Future<void> addItemToInventory(
         label.isEmpty ||
         image == null) {
       socket.sink.add(json
-          .encode({"endpoint": "ADDNEWITEM", "message": "missing some field"}));
+          .encode({endpoint: valueEdnpoint, warning: "missing some field"}));
     }
 
     final result = await collection.findOne(where.exists(nameCategory));
@@ -29,8 +33,8 @@ Future<void> addItemToInventory(
     if (result == null && result![nameCategory] == null) {
       print("the category is not exists ");
       socket.sink.add(json.encode({
-        "endpoint": "ADDNEWITEM",
-        "message": "category name is not found",
+        endpoint: valueEdnpoint,
+        warning: "category name is not found",
       }));
     }
 
@@ -58,7 +62,7 @@ Future<void> addItemToInventory(
           },
         ));
 
-    if (updateCollection.nModified > 0) {
+    if (updateCollection.success) {
       print('Document updated successfully');
       socket.sink.add(json.encode({
         "endpoint": "ADDNEWITEM",
@@ -67,8 +71,8 @@ Future<void> addItemToInventory(
     } else {
       print('No document found with that _id or no changes made');
       socket.sink.add(json.encode({
-        "endpoint": "ADDNEWITEM",
-        "message": "not category found ",
+        endpoint: valueEdnpoint,
+        warning: "not category found ",
       }));
     }
   } catch (e, s) {

@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+const String endpoint = 'endpoint';
+const String warning = 'warning';
+const String valueEdnpoint = "NEWCOLLECTION";
+
 Future<void> addNewCollection({
   required WebSocketChannel socket,
   required payload,
@@ -17,8 +21,8 @@ Future<void> addNewCollection({
     if (newCollection.isEmpty) {
       socket.sink.add(json.encode(
         {
-          "endpoint": "ADDNEWCOLLECTION",
-          "message": "missing some field",
+          endpoint: valueEdnpoint,
+          warning: "missing some field",
         },
       ));
       return;
@@ -29,8 +33,8 @@ Future<void> addNewCollection({
     if (result != null) {
       socket.sink.add(json.encode(
         {
-          "endpoint": "ADDNEWCOLLECTION",
-          "message": "new category already exists",
+          endpoint: valueEdnpoint,
+          warning: "new category already exists",
         },
       ));
       return;
@@ -41,7 +45,7 @@ Future<void> addNewCollection({
     });
     socket.sink.add(json.encode(
       {
-        "endpoint": "ADDNEWCOLLECTION",
+        endpoint: valueEdnpoint,
         "message": "success add new category",
       },
     ));

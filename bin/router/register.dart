@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+const String endpoint = 'endpoint';
+const String warning = 'warning';
+const String valueEdnpoint = "RIGISTER";
+
 Future<void> addNewAdmin({
   dynamic payload,
   required WebSocketChannel socket,
@@ -14,8 +18,8 @@ Future<void> addNewAdmin({
     final passowrd = payload['password'];
     if (nameNewAdmin == null || passowrd == null) {
       socket.sink.add(json.encode({
-        "endpoint": "REGISTER",
-        "message": "user name or password must fill "
+        endpoint: valueEdnpoint,
+        warning: "user name or password must fill "
       }));
     }
 
@@ -23,7 +27,7 @@ Future<void> addNewAdmin({
     if (findUser != null) {
       socket.sink.add(json.encode({
         "endpoint": "REGISTER",
-        "message": "name user alredy exists",
+        warning: "name user alredy exists",
       }));
     }
 
@@ -35,7 +39,7 @@ Future<void> addNewAdmin({
     });
 
     socket.sink.add(json
-        .encode({"endpoint": "REGISTER", "message": "succes add new admin"}));
+        .encode({endpoint: valueEdnpoint, "message": "succes add new admin"}));
   } catch (e, s) {
     print(e);
     print(s);
