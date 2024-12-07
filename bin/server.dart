@@ -6,46 +6,88 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'router/register.dart';
 import 'router/login.dart';
 import 'router/logout.dart';
+import 'router/verifikasi.dart';
+import 'router/add_new_collection.dart';
+import 'router/add_new_item.dart';
 
-void handleWebSocket(WebSocketChannel socket) async {
-  final String url = 'mongodb://localhost:27017/inventory';
+final Set<WebSocketChannel> channel = {};
 
-  final dataBase = Db(url);
-  final itemColection = dataBase.collection('category');
+void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
+  final categoryColection = dataBase.collection('category');
   final authAdmin = dataBase.collection('authAdmin');
   final borrowing = dataBase.collection('borrowing');
   final itemBack = dataBase.collection('returnItem');
   final pendingItem = dataBase.collection('pendingReturn');
   final expiredToken = dataBase.collection('expiredToken');
-  await dataBase.open();
   try {
-    await dataBase.open();
+    socket.stream.listen((event) {
+      var data = json.decode(event);
+      final endpoint = data['endpoint'];
+      final payload = data['data'];
 
-    socket.stream.listen(
-      (event) {
-        var data = json.decode(event);
-        final endpoint = data['endpoint'];
-        final payload = data['data'];
-
-        switch (endpoint) {
-          case "register":
-            addNewAdmin(payload, socket, authAdmin);
-            break;
-          case "login":
-            login(collection: authAdmin, data: payload, socket: socket);
-            break;
-          case "logout":
-            logout(payload: payload, socket: socket, colection: expiredToken);
-            break;
-          default:
-        }
-      },
-    );
+      switch (endpoint) {
+        case "register":
+          addNewAdmin(
+            payload: payload,
+            socket: socket,
+            authAdmin: authAdmin,
+            dataBase: dataBase,
+          );
+          break;
+        case "login":
+          login(
+            collection: authAdmin,
+            data: payload,
+            socket: socket,
+            dataBase: dataBase,
+          );
+          break;
+        case "logout":
+          logout(
+            payload: payload,
+            socket: socket,
+            colection: expiredToken,
+            dataBase: dataBase,
+          );
+          break;
+        case "verifikasi":
+          verifikasiToken(
+            colection: expiredToken,
+            payload: payload,
+            socket: socket,
+            dataBase: dataBase,
+          );
+          break;
+        case "addNewCollection":
+          addNewCollection(
+            socket: socket,
+            payload: payload,
+            dataBase: dataBase,
+            collection: categoryColection,
+          );
+          break;
+        case "addNewItem":
+          addItemToInventory(
+            socket: socket,
+            payload: payload,
+            dataBase: dataBase,
+            collection: categoryColection,
+          );
+          break;
+        default:
+          socket.sink.add(json.encode({"error": "endpoint not found"}));
+      }
+    }, onDone: () {
+      channel.remove(socket);
+      socket.sink.close();
+      print("is close");
+    }, onError: (e) {
+      print('on error');
+      print(e);
+    });
   } catch (e, s) {
     print(e);
     print(s);
-  } finally {
-    await dataBase.close();
   }
 }
 
@@ -53,11 +95,15 @@ void main(List<String> args) async {
   final server = await HttpServer.bind('127.0.0.1', 8080);
   print('webSocker listening on ws:/$server');
 
+  final String url = 'mongodb://localhost:27017/inventory';
+  final dataBase = Db(url);
+
   await for (HttpRequest request in server) {
     if (request.uri.path == '/ws') {
       final socket = await WebSocketTransformer.upgrade(request);
       final chanel = IOWebSocketChannel(socket);
-      handleWebSocket(chanel);
+      channel.add(chanel);
+      handleWebSocket(chanel, dataBase);
     } else {
       request.response
         ..statusCode = HttpStatus.forbidden
@@ -123,86 +169,6 @@ void main(List<String> args) async {
 //   }
 // }
 
-// Future<Response> addNewCollection(Request req) async {
-//   try {
-//     final request = await req.readAsString();
-//     final data = json.decode(request);
-
-//     final newCollection = data['category'];
-
-//     if (!data.containsKey('category')) {
-//       return Response(404,
-//           body: json.encode(
-//             {"message": "missing some field"},
-//           ));
-//     }
-
-//     if (db['category'].containsKey(newCollection)) {
-//       return Response(404,
-//           body: json.encode(
-//             {"message": "new category already exists"},
-//           ));
-//     }
-
-//     db['category'][newCollection] = {};
-//     print(db['category']);
-//     return Response(200,
-//         body: json.encode({"message": "success to add new category"}));
-//   } catch (e, s) {
-//     print(e);
-//     print(s);
-//     return Response(500,
-//         body: json.encode({"message": "internal server error"}));
-//   }
-// }
-
-// Future<Response> addItemToInventory(Request req) async {
-//   try {
-//     final request = await req.readAsString();
-//     final data = json.decode(request);
-//     if (!data.containsKey("category") ||
-//         !data.containsKey("name") ||
-//         !data.containsKey("label")) {
-//       return Response(400,
-//           body: json.encode({"message": "missing some field"}));
-//     }
-//     final nameCategory = data['category'];
-//     final nameItem = data['name'];
-//     final label = data['label'];
-//     final image = data['image'];
-
-//     if (!db['category'].containsKey(nameCategory)) {
-//       print("the category is not exists ");
-//       return Response(404,
-//           body: json.encode({"message": "category is not found"}));
-//     }
-
-//     final List lastIndex =
-//         db['category'][nameCategory].keys.map((key) => int.parse(key)).toList();
-//     // Menghitung key terakhir jika sudah ada data
-//     int lastKey =
-//         lastIndex.isEmpty ? 0 : lastIndex.reduce((a, b) => a > b ? a : b);
-
-//     // Menentukan key baru yang increment
-//     String newKey = "${lastKey + 1}";
-
-//     // Menambahkan item baru dengan key increment
-//     db['category'][nameCategory]![newKey] = {
-//       'name': nameItem,
-//       'Label': label,
-//       "status": "available",
-//       'image': image ?? "-",
-//     };
-//     print(db['category']);
-//     return Response(200,
-//         body: json.encode({"message": "success to add item to inventory"}));
-//   } catch (e, s) {
-//     print(e);
-//     print(s);
-//     return Response(500,
-//         body: json.encode({"message": "internal server error"}));
-//   }
-// }
 
 // Future<Response> borrowingItem(Request req) async {
 //   try {
