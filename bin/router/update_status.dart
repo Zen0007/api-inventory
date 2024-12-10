@@ -25,7 +25,7 @@ Future<void> updateStatusItem({
       modify.set("$nameCategory.$indexItem.status", "borrow"),
     );
 
-    if (updateStatusItem.success) {
+    if (updateStatusItem.isSuccess) {
       socket.sink.add(json.encode(
         {
           endpoint: valueEdnpoint,

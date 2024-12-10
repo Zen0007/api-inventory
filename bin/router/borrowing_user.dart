@@ -22,16 +22,18 @@ Future<void> borrowingItem({
     final String classUser = payload['class'];
     final String nisnUser = payload['nisn'];
     final String nameTeacher = payload['teacher'];
+    final String timeBorrow = payload['time'];
 
     // type another string
     final item = payload['item'];
-    final imageSelfie = payload['imageSelfie'];
-    final imageNisn = payload['imageNisn'];
+    final String imageSelfie = payload['imageSelfie'];
+    final String? imageNisn = payload['imageNisn'];
 
     if (nameUser.isEmpty ||
         classUser.isEmpty ||
         nisnUser.isEmpty ||
-        nameTeacher.isEmpty) {
+        nameTeacher.isEmpty ||
+        timeBorrow.isEmpty) {
       socket.sink.add(json.encode(
         {
           endpoint: valueEdnpoint,
@@ -40,7 +42,7 @@ Future<void> borrowingItem({
       ));
     }
 
-    if (imageNisn == null || imageSelfie == null) {
+    if (imageSelfie.isEmpty) {
       socket.sink.add(json.encode(
         {
           endpoint: valueEdnpoint,
@@ -48,7 +50,6 @@ Future<void> borrowingItem({
         },
       ));
     }
-    final hexNisn = await saveImage(imageNisn, dataBase);
     final hexSelfie = await saveImage(imageSelfie, dataBase);
 
     final sendData = await collection.insertOne({
@@ -59,15 +60,16 @@ Future<void> borrowingItem({
         "nisn": nisnUser,
         "nameTeacher": nameTeacher,
         "imageSelfie": hexSelfie,
-        "imageNisn": hexNisn,
+        "imageNisn": imageNisn ?? "empety",
+        "timeBorrow": timeBorrow,
         "item": item,
       }
     });
 
-    if (sendData.success) {
+    if (sendData.isSuccess) {
       socket.sink.add(json.encode(
         {
-          "endpoint": "BORROWING",
+          endpoint: valueEdnpoint,
           "message": "success borrow",
         },
       ));
@@ -79,34 +81,6 @@ Future<void> borrowingItem({
         },
       ));
     }
-
-    // if (!db['category'][collection].containsKey(indexItem)) {
-    //   return Response(404,
-    //       body: json.encode(
-    //         {"message": 'the name index not found in colection $collection'},
-    //       ));
-    // }
-
-    // final borrowItem = db['category'][collection][indexItem];
-
-    // final Map<String, Object> borrow = {
-    //   "status": "borrow",
-    //   "userName": nameUser,
-    //   "class": classUser,
-    //   "nameTeacher": nameTeacher,
-    //   "nisn": nisnUser,
-    //   "imageNisn": imageNisn ?? '-',
-    //   "imageSelfie": imageSelfie ?? '-',
-    //   "item": {}
-    // };
-    // db['borrowing'][nameUser] = borrow;
-
-    // // Add the item to the user's borrowing collection without replacing existing items
-    // db['borrowing'][nameUser]['item'][collection] ??= {};
-    // db['borrowing'][nameUser]['item'][collection][indexItem] = borrowItem;
-
-    // print(db['borrowing']);
-    // return Response(200, body: json.encode({"userBorrow": nameUser}));
   } catch (e, s) {
     print(e);
     print(s);

@@ -20,8 +20,12 @@ Future<void> waithPermitAdmin({
     var result = await borrowing.findOne(where.exists(nameUser));
 
     if (result == null) {
-      socket.sink
-          .add(json.encode({endpoint: valueEdnpoint, warning: "failed"}));
+      socket.sink.add(json.encode(
+        {
+          endpoint: valueEdnpoint,
+          warning: "failed",
+        },
+      ));
     }
 
     await borrowing.updateOne(

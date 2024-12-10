@@ -56,17 +56,19 @@ Future<void> granted({
       ));
     }
 
+    final items = findUserInPending![userName]['item'];
     await itemBack.updateOne(
       where.id(findUserItemBack!['_id']),
       modify.set(
         "$userName",
         {
+          "imageSelfie": items["imageSelfie"],
           "verifikasi": adminName,
           "time": dateTime,
         },
       ),
     );
-    final items = findUserInPending![userName]['item'];
+
     print(items);
 
     if (items == null) {
@@ -87,7 +89,7 @@ Future<void> granted({
         if (categoryItem != null) {
           await category.updateOne(
             where.id(categoryItem["_id"]),
-            modify.set("$categoryKey.$itemKey.status", "availble"),
+            modify.set("$categoryKey.$itemKey.status", "available"),
           );
         }
       });

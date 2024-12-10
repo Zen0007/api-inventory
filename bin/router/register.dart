@@ -26,7 +26,7 @@ Future<void> addNewAdmin({
     final findUser = await authAdmin.findOne(where.eq("name", nameNewAdmin));
     if (findUser != null) {
       socket.sink.add(json.encode({
-        "endpoint": "REGISTER",
+        endpoint: "REGISTER",
         warning: "name user alredy exists",
       }));
     }

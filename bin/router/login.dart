@@ -41,16 +41,13 @@ Future<void> login({
     final token = jwt.sign(SecretKey(secretKey));
 
     final findNameAdmin = await collection.findOne(
-      where.eq('$userName.name', userName).eq(
-            "$userName.password",
-            password,
-          ),
+      where.eq('$userName.name', userName).eq("$userName.password", password),
     );
 
     if (findNameAdmin != null) {
       socket.sink.add(
         json.encode(
-          {endpoint: valueEdnpoint, "token": token},
+          {endpoint: valueEdnpoint, "message": token},
         ),
       );
       return;

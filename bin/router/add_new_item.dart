@@ -62,7 +62,7 @@ Future<void> addItemToInventory(
           },
         ));
 
-    if (updateCollection.success) {
+    if (updateCollection.isSuccess) {
       print('Document updated successfully');
       socket.sink.add(json.encode({
         "endpoint": "ADDNEWITEM",

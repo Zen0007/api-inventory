@@ -21,10 +21,10 @@ Future<void> checkUserIsBorrow({
     final result = await collection.findOne(where.exists(dataUser));
 
     if (result == null) {
-      socket.sink.add(json.encode({endpoint: valueEdnpoint, "user": null}));
+      socket.sink.add(json.encode({endpoint: valueEdnpoint, warning: null}));
     }
 
-    socket.sink.add(json.encode({endpoint: valueEdnpoint, "user": result}));
+    socket.sink.add(json.encode({endpoint: valueEdnpoint, "message": result}));
   } catch (e, s) {
     print(e);
     print(s);

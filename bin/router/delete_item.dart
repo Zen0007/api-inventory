@@ -21,7 +21,7 @@ Future<void> deleteItem({
     if (nameCategory.isEmpty || indexItem.isEmpty) {
       socket.sink.add(json.encode({
         endpoint: valueEdnpoint,
-        "warning": "missing some field",
+        warning: "missing some field",
       }));
     }
 
@@ -32,7 +32,7 @@ Future<void> deleteItem({
       modify.unset("$nameCategory.$indexItem"),
     );
 
-    if (deleteItem.success) {
+    if (deleteItem.isSuccess) {
       socket.sink.add(json.encode(
         {
           endpoint: valueEdnpoint,

@@ -15,6 +15,9 @@ import 'router/borrowing_user.dart';
 import 'router/chek_user_has_borrow.dart';
 import 'router/wait_permision.dart';
 import 'router/granted.dart';
+import 'router/get_category_data.dart';
+import 'router/get_borrow_data.dart';
+import 'router/get_pending_data.dart';
 
 final Set<WebSocketChannel> channel = {};
 
@@ -129,6 +132,28 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             borrow: borrowing,
             itemBack: itemBack,
             payload: payload,
+          );
+          break;
+        case "getDataCollection":
+          getDataCollection(
+            socket: socket,
+            dataBase: dataBase,
+            collection: categoryColection,
+            payload: payload,
+          );
+          break;
+        case "getDataBorrow":
+          getDataBorrow(
+            socket: socket,
+            dataBase: dataBase,
+            collection: borrowing,
+          );
+          break;
+        case "getDataPending":
+          getDataPending(
+            socket: socket,
+            dataBase: dataBase,
+            collection: pending,
           );
           break;
         default:
