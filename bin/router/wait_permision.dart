@@ -26,10 +26,11 @@ Future<void> waithPermitAdmin({
           warning: "failed",
         },
       ));
+      return;
     }
 
     await borrowing.updateOne(
-      where.id(result!['_id']),
+      where.id(result['_id']),
       modify.set("$nameUser.status", "pending"),
     );
 
@@ -40,9 +41,10 @@ Future<void> waithPermitAdmin({
     if (updateStatus == null) {
       socket.sink
           .add(json.encode({endpoint: valueEdnpoint, warning: "failed"}));
+      return;
     }
 
-    await pending.update(where.id(updateStatus!["_id"]),
+    await pending.update(where.id(updateStatus["_id"]),
         modify.set("$nameUser.status", "wait permision"));
 
     socket.sink.add(json.encode(

@@ -24,18 +24,30 @@ Future<void> addItemToInventory(
         nameItem.isEmpty ||
         label.isEmpty ||
         image == null) {
-      socket.sink.add(json
-          .encode({endpoint: valueEdnpoint, warning: "missing some field"}));
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            warning: "missing some field",
+          },
+        ),
+      );
+      return;
     }
 
     final result = await collection.findOne(where.exists(nameCategory));
 
     if (result == null && result![nameCategory] == null) {
       print("the category is not exists ");
-      socket.sink.add(json.encode({
-        endpoint: valueEdnpoint,
-        warning: "category name is not found",
-      }));
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            warning: "category name is not found",
+          },
+        ),
+      );
+      return;
     }
 
     List<int> lastIndex = (result[nameCategory] as Map<String, dynamic>)
@@ -64,16 +76,25 @@ Future<void> addItemToInventory(
 
     if (updateCollection.isSuccess) {
       print('Document updated successfully');
-      socket.sink.add(json.encode({
-        "endpoint": "ADDNEWITEM",
-        "message": "success add new item",
-      }));
+      socket.sink.add(
+        json.encode(
+          {
+            "endpoint": "ADDNEWITEM",
+            "message": "success add new item",
+          },
+        ),
+      );
+      return;
     } else {
       print('No document found with that _id or no changes made');
-      socket.sink.add(json.encode({
-        endpoint: valueEdnpoint,
-        warning: "not category found ",
-      }));
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            warning: "not category found ",
+          },
+        ),
+      );
     }
   } catch (e, s) {
     print(e);

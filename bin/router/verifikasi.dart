@@ -17,11 +17,13 @@ Future<void> verifikasiToken({
     if (token != null) {
       socket.sink.add(
           json.encode({"endpoint": "VERIFIKASI", "status": "NOT-VERIFIKASI"}));
+      return;
     }
 
     if (status.isEmpty) {
       socket.sink.add(
           json.encode({"endpoint": "VERIFIKASI", "status": "NOT-VERIFIKASI"}));
+      return;
     }
 
     const String secretKey =

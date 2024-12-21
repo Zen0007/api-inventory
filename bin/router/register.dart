@@ -16,11 +16,16 @@ Future<void> addNewAdmin({
     await dataBase.open();
     final nameNewAdmin = payload['name'];
     final passowrd = payload['password'];
+
+    // for recode who add new admin
+    final nameAdminAdd = payload['nameAdd'];
+
     if (nameNewAdmin == null || passowrd == null) {
       socket.sink.add(json.encode({
         endpoint: valueEdnpoint,
         warning: "user name or password must fill "
       }));
+      return;
     }
 
     final findUser = await authAdmin.findOne(where.eq("name", nameNewAdmin));
@@ -29,12 +34,14 @@ Future<void> addNewAdmin({
         endpoint: "REGISTER",
         warning: "name user alredy exists",
       }));
+      return;
     }
 
     await authAdmin.insert({
       nameNewAdmin: {
         "name": nameNewAdmin,
         "password": passowrd,
+        "addBy": nameAdminAdd,
       }
     });
 

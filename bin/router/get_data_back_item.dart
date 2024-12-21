@@ -22,6 +22,7 @@ Future<void> getDataBackItem({
           warning: "data borrowing Is empty ",
         },
       ));
+      return;
     }
 
     socket.sink.add(json.encode(

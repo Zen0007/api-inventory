@@ -5,21 +5,25 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 const String endpoint = 'endpoint';
 const String warning = 'warning';
-const String valueEdnpoint = "GETDATAPENDING";
+const String valueEdnpoint = "GETDATAALLCATEGORY";
 
-Future<void> getDataPending({
+Future<void> getDataAllCategory({
   required WebSocketChannel socket,
   required Db dataBase,
   required DbCollection collection,
+  required dynamic payload,
 }) async {
   try {
     await dataBase.open();
-    final getData = await collection.find().toList();
-    if (getData.isEmpty) {
+
+    final String nameCollection = payload['collection'];
+
+    final data = await collection.find(where.exists(nameCollection)).toList();
+    if (data.isEmpty) {
       socket.sink.add(json.encode(
         {
           endpoint: valueEdnpoint,
-          warning: "data borrowing Is empty ",
+          warning: "data collection Is empty ",
         },
       ));
       return;
@@ -28,7 +32,7 @@ Future<void> getDataPending({
     socket.sink.add(json.encode(
       {
         endpoint: valueEdnpoint,
-        "message": getData,
+        "message": data,
       },
     ));
   } catch (e, s) {

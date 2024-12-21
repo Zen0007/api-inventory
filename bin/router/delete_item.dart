@@ -23,6 +23,7 @@ Future<void> deleteItem({
         endpoint: valueEdnpoint,
         warning: "missing some field",
       }));
+      return;
     }
 
     final findIndex = await collection.findOne(where.exists(nameCategory));
@@ -39,6 +40,7 @@ Future<void> deleteItem({
           "message": "success to delete item",
         },
       ));
+      return;
     } else {
       socket.sink.add(json.encode(
         {

@@ -40,6 +40,7 @@ Future<void> borrowingItem({
           warning: "missing some field",
         },
       ));
+      return;
     }
 
     if (imageSelfie.isEmpty) {
@@ -49,6 +50,7 @@ Future<void> borrowingItem({
           warning: "image is empety",
         },
       ));
+      return;
     }
     final hexSelfie = await saveImage(imageSelfie, dataBase);
 
@@ -73,6 +75,7 @@ Future<void> borrowingItem({
           "message": "success borrow",
         },
       ));
+      return;
     } else {
       socket.sink.add(json.encode(
         {

@@ -33,6 +33,7 @@ Future<void> granted({
           warning: "user not found",
         },
       ));
+      return;
     }
 
     if (findUserInPending == null) {
@@ -42,9 +43,10 @@ Future<void> granted({
           warning: "user not found",
         },
       ));
+      return;
     }
 
-    await itemBack.insertOne(findUserBorrow!);
+    await itemBack.insertOne(findUserBorrow);
     final findUserItemBack = await itemBack.findOne(where.exists(userName));
 
     if (findUserItemBack == null) {
@@ -54,11 +56,12 @@ Future<void> granted({
           warning: "user not found",
         },
       ));
+      return;
     }
 
-    final items = findUserInPending![userName]['item'];
+    final items = findUserInPending[userName]['item'];
     await itemBack.updateOne(
-      where.id(findUserItemBack!['_id']),
+      where.id(findUserItemBack['_id']),
       modify.set(
         "$userName",
         {
@@ -78,6 +81,7 @@ Future<void> granted({
           warning: "failed",
         },
       ));
+      return;
     }
 
     // Iterate over each category in the items
@@ -108,6 +112,7 @@ Future<void> granted({
           "message": "success",
         },
       ));
+      return;
     } else {
       socket.sink.add(json.encode(
         {

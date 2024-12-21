@@ -22,6 +22,7 @@ Future<void> checkUserIsBorrow({
 
     if (result == null) {
       socket.sink.add(json.encode({endpoint: valueEdnpoint, warning: null}));
+      return;
     }
 
     socket.sink.add(json.encode({endpoint: valueEdnpoint, "message": result}));

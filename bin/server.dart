@@ -18,6 +18,7 @@ import 'router/granted.dart';
 import 'router/get_category_data.dart';
 import 'router/get_borrow_data.dart';
 import 'router/get_pending_data.dart';
+import 'router/get_key_collection.dart';
 
 final Set<WebSocketChannel> channel = {};
 
@@ -135,11 +136,10 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
           );
           break;
         case "getDataCollection":
-          getDataCollection(
+          getDataCategory(
             socket: socket,
             dataBase: dataBase,
             collection: categoryColection,
-            payload: payload,
           );
           break;
         case "getDataBorrow":
@@ -154,6 +154,14 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             socket: socket,
             dataBase: dataBase,
             collection: pending,
+          );
+          break;
+        case "getAllKeyCategory":
+          getDataAllKeyCategory(
+            socket: socket,
+            dataBase: dataBase,
+            collection: categoryColection,
+            payload: payload,
           );
           break;
         default:
@@ -212,10 +220,3 @@ void main(List<String> args) async {
 //         body: json.encode({"message": "internal server error"}));
 //   }
 // }
-
-
-
-
-
-
-

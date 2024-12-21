@@ -20,6 +20,7 @@ Future<void> logout(
     if (logout.success) {
       socket.sink.add(
           json.encode({endpoint: valueEdnpoint, "message": "lougut success"}));
+      return;
     } else {
       socket.sink.add(
           json.encode({endpoint: valueEdnpoint, warning: "lougut failed"}));
