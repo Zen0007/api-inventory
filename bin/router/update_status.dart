@@ -9,12 +9,10 @@ const String valueEdnpoint = "UPDATESTATUSITEM";
 
 Future<void> updateStatusItem({
   required WebSocketChannel socket,
-  required Db dataBase,
   required DbCollection collection,
   required dynamic payload,
 }) async {
   try {
-    await dataBase.open();
     final nameCategory = payload['category'];
     final indexItem = payload['index'];
 
@@ -44,7 +42,5 @@ Future<void> updateStatusItem({
   } catch (e, s) {
     print(e);
     print(s);
-  } finally {
-    await dataBase.close();
   }
 }

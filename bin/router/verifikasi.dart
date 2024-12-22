@@ -7,11 +7,9 @@ Future<void> verifikasiToken({
   required dynamic payload,
   required WebSocketChannel socket,
   required DbCollection colection,
-  required Db dataBase,
 }) async {
   //this way for chek if  admin token still applies or expired
   try {
-    await dataBase.open();
     final String status = payload['token'];
     final token = await colection.findOne(where.eq("token", status));
     if (token != null) {
@@ -43,7 +41,5 @@ Future<void> verifikasiToken({
     print(s);
     socket.sink.add(
         json.encode({"endpoint": "VERIFIKASI", "status": "NOT-VERIFIKASI"}));
-  } finally {
-    await dataBase.close();
   }
 }

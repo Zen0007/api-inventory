@@ -10,10 +10,8 @@ Future<void> addNewAdmin({
   dynamic payload,
   required WebSocketChannel socket,
   required DbCollection authAdmin,
-  required Db dataBase,
 }) async {
   try {
-    await dataBase.open();
     final nameNewAdmin = payload['name'];
     final passowrd = payload['password'];
 
@@ -50,7 +48,5 @@ Future<void> addNewAdmin({
   } catch (e, s) {
     print(e);
     print(s);
-  } finally {
-    await dataBase.close();
   }
 }

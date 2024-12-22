@@ -11,12 +11,9 @@ const String valueEdnpoint = "CHECKUSER";
 Future<void> checkUserIsBorrow({
   required WebSocketChannel socket,
   required dynamic payload,
-  required Db dataBase,
   required DbCollection collection,
 }) async {
   try {
-    await dataBase.open();
-
     final dataUser = payload['name'];
     final result = await collection.findOne(where.exists(dataUser));
 
@@ -29,7 +26,5 @@ Future<void> checkUserIsBorrow({
   } catch (e, s) {
     print(e);
     print(s);
-  } finally {
-    await dataBase.close();
   }
 }

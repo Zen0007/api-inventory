@@ -7,14 +7,12 @@ const String endpoint = 'endpoint';
 const String warning = 'warning';
 const String valueEdnpoint = "NEWITEM";
 
-Future<void> addItemToInventory(
-    {required WebSocketChannel socket,
-    dynamic payload,
-    required Db dataBase,
-    required DbCollection collection}) async {
+Future<void> addItemToInventory({
+  required WebSocketChannel socket,
+  dynamic payload,
+  required DbCollection collection,
+}) async {
   try {
-    await dataBase.open();
-
     final String nameCategory = payload['category'];
     final String nameItem = payload['name'];
     final String label = payload['label'];
@@ -99,7 +97,5 @@ Future<void> addItemToInventory(
   } catch (e, s) {
     print(e);
     print(s);
-  } finally {
-    await dataBase.close();
   }
 }

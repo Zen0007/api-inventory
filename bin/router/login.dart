@@ -11,18 +11,38 @@ Future<void> login({
   required dynamic data,
   required WebSocketChannel socket,
   required DbCollection collection,
-  required Db dataBase,
 }) async {
   try {
-    await dataBase.open();
     final userName = data['name'];
     final password = data['password'];
-
+    print(userName);
+    print(password);
     if (userName == null || password == null) {
       socket.sink.add(json.encode(
         {
           endpoint: valueEdnpoint,
           warning: "user name or password is field",
+        },
+      ));
+      return;
+    }
+    final findUser = await collection.findOne(where.exists(userName));
+
+    if (findUser == null) {
+      socket.sink.add(json.encode(
+        {
+          endpoint: valueEdnpoint,
+          warning: "user not exists",
+        },
+      ));
+      return;
+    }
+
+    if (findUser[userName]['password'] != password) {
+      socket.sink.add(json.encode(
+        {
+          endpoint: valueEdnpoint,
+          warning: "password is wrong",
         },
       ));
       return;
@@ -40,26 +60,15 @@ Future<void> login({
     final jwt = JWT(payload);
     final token = jwt.sign(SecretKey(secretKey));
 
-    final findNameAdmin = await collection.findOne(
-      where.eq('$userName.name', userName).eq("$userName.password", password),
-    );
-
-    if (findNameAdmin != null) {
+    if (findUser[userName]['password'] == password) {
       socket.sink.add(
         json.encode(
           {endpoint: valueEdnpoint, "message": token},
         ),
       );
-      return;
-    } else {
-      socket.sink.add(
-          json.encode({endpoint: valueEdnpoint, warning: "user not found"}));
-      return;
     }
   } catch (e, s) {
     print(e);
     print(s);
-  } finally {
-    await dataBase.close();
   }
 }

@@ -9,17 +9,15 @@ const String valueEdnpoint = "GETDATAPENDING";
 
 Future<void> getDataPending({
   required WebSocketChannel socket,
-  required Db dataBase,
   required DbCollection collection,
 }) async {
   try {
-    await dataBase.open();
     final getData = await collection.find().toList();
     if (getData.isEmpty) {
       socket.sink.add(json.encode(
         {
           endpoint: valueEdnpoint,
-          warning: "data borrowing Is empty ",
+          "message": [],
         },
       ));
       return;
@@ -34,7 +32,5 @@ Future<void> getDataPending({
   } catch (e, s) {
     print(e);
     print(s);
-  } finally {
-    await dataBase.close();
   }
 }

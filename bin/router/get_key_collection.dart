@@ -9,21 +9,15 @@ const String valueEdnpoint = "GETDATAALLKEYCATEGORY";
 
 Future<void> getDataAllKeyCategory({
   required WebSocketChannel socket,
-  required Db dataBase,
   required DbCollection collection,
-  required dynamic payload,
 }) async {
   try {
-    await dataBase.open();
-
-    final String nameCollection = payload['collection'];
-
-    final data = await collection.find(where.exists(nameCollection)).toList();
+    final data = await collection.find().toList();
     if (data.isEmpty) {
       socket.sink.add(json.encode(
         {
           endpoint: valueEdnpoint,
-          warning: "data collection Is empty ",
+          "message": [],
         },
       ));
       return;
@@ -49,7 +43,5 @@ Future<void> getDataAllKeyCategory({
   } catch (e, s) {
     print(e);
     print(s);
-  } finally {
-    await dataBase.close();
   }
 }

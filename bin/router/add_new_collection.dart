@@ -10,12 +10,9 @@ const String valueEdnpoint = "NEWCOLLECTION";
 Future<void> addNewCollection({
   required WebSocketChannel socket,
   required payload,
-  required Db dataBase,
   required DbCollection collection,
 }) async {
   try {
-    await dataBase.open();
-
     final String newCollection = payload['category'];
 
     if (newCollection.isEmpty) {
@@ -55,7 +52,5 @@ Future<void> addNewCollection({
   } catch (e, s) {
     print(e);
     print(s);
-  } finally {
-    await dataBase.close();
   }
 }

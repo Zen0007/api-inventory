@@ -15,10 +15,12 @@ import 'router/borrowing_user.dart';
 import 'router/chek_user_has_borrow.dart';
 import 'router/wait_permision.dart';
 import 'router/granted.dart';
-import 'router/get_category_data.dart';
 import 'router/get_borrow_data.dart';
 import 'router/get_pending_data.dart';
 import 'router/get_key_collection.dart';
+import 'router/get_data_all_category.dart';
+import 'router/get_data_back_item.dart';
+import 'router/get_category_data.dart';
 
 final Set<WebSocketChannel> channel = {};
 
@@ -41,7 +43,6 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             payload: payload,
             socket: socket,
             authAdmin: authAdmin,
-            dataBase: dataBase,
           );
           break;
         case "login":
@@ -49,7 +50,6 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             collection: authAdmin,
             data: payload,
             socket: socket,
-            dataBase: dataBase,
           );
           break;
         case "logout":
@@ -57,7 +57,6 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             payload: payload,
             socket: socket,
             colection: expiredToken,
-            dataBase: dataBase,
           );
           break;
         case "verifikasi":
@@ -65,14 +64,12 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             colection: expiredToken,
             payload: payload,
             socket: socket,
-            dataBase: dataBase,
           );
           break;
         case "newCollection":
           addNewCollection(
             socket: socket,
             payload: payload,
-            dataBase: dataBase,
             collection: categoryColection,
           );
           break;
@@ -80,21 +77,19 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
           addItemToInventory(
             socket: socket,
             payload: payload,
-            dataBase: dataBase,
             collection: categoryColection,
           );
           break;
         case "deleteItem":
           deleteItem(
-              socket: socket,
-              dataBase: dataBase,
-              collection: categoryColection,
-              payload: payload);
+            socket: socket,
+            collection: categoryColection,
+            payload: payload,
+          );
           break;
         case "updateStatusItem":
           updateStatusItem(
             socket: socket,
-            dataBase: dataBase,
             collection: categoryColection,
             payload: payload,
           );
@@ -111,7 +106,6 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
           checkUserIsBorrow(
             socket: socket,
             payload: payload,
-            dataBase: dataBase,
             collection: borrowing,
           );
           break;
@@ -119,7 +113,6 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
           waithPermitAdmin(
             socket: socket,
             payload: payload,
-            dataBase: dataBase,
             borrowing: borrowing,
             pending: pending,
           );
@@ -127,7 +120,6 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
         case "granted":
           granted(
             socket: socket,
-            dataBase: dataBase,
             category: categoryColection,
             pending: pending,
             borrow: borrowing,
@@ -135,33 +127,40 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             payload: payload,
           );
           break;
-        case "getDataCollection":
-          getDataCategory(
+        case "getDataAllCollection":
+          getDataAllCategory(
             socket: socket,
-            dataBase: dataBase,
             collection: categoryColection,
           );
           break;
         case "getDataBorrow":
           getDataBorrow(
             socket: socket,
-            dataBase: dataBase,
             collection: borrowing,
           );
           break;
         case "getDataPending":
           getDataPending(
             socket: socket,
-            dataBase: dataBase,
             collection: pending,
           );
           break;
         case "getAllKeyCategory":
           getDataAllKeyCategory(
             socket: socket,
-            dataBase: dataBase,
             collection: categoryColection,
-            payload: payload,
+          );
+          break;
+        case "getDataItemBack":
+          getDataBackItem(
+            socket: socket,
+            collection: itemBack,
+          );
+          break;
+        case "getDataCollectionAvaileble":
+          getDataCategoryAvaileble(
+            socket: socket,
+            collection: categoryColection,
           );
           break;
         default:
@@ -189,34 +188,28 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
 }
 
 void main(List<String> args) async {
-  final server = await HttpServer.bind('127.0.0.1', 8080);
-  print('webSocker listening on ws:/$server');
+  try {
+    final server = await HttpServer.bind('127.0.0.1', 8080);
+    print('webSocker listening on ws:/$server');
 
-  final String url = 'mongodb://localhost:27017/inventory';
-  final dataBase = Db(url);
-
-  await for (HttpRequest request in server) {
-    if (request.uri.path == '/ws') {
-      final socket = await WebSocketTransformer.upgrade(request);
-      final chanel = IOWebSocketChannel(socket);
-      channel.add(chanel);
-      handleWebSocket(chanel, dataBase);
-    } else {
-      request.response
-        ..statusCode = HttpStatus.forbidden
-        ..close();
+    final Db dataBase = Db('mongodb://localhost:27017/inventory');
+    await dataBase.open();
+    await for (HttpRequest request in server) {
+      if (request.uri.path == '/ws') {
+        final socket = await WebSocketTransformer.upgrade(request);
+        final chanel = IOWebSocketChannel(socket);
+        channel.add(chanel);
+        handleWebSocket(chanel, dataBase);
+      } else {
+        request.response
+          ..statusCode = HttpStatus.forbidden
+          ..close();
+      }
     }
+
+    print("done");
+  } catch (e, s) {
+    print(e);
+    print(s);
   }
 }
-
-// Future<Response> deleteBorrowingUser(Request req) async {
-//   try {
-//     return Response(200,
-//         body: json.encode({"message": "success delete user "}));
-//   } catch (e, s) {
-//     print(e);
-//     print(s);
-//     return Response(500,
-//         body: json.encode({"message": "internal server error"}));
-//   }
-// }

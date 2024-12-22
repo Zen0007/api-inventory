@@ -9,7 +9,6 @@ const String valueEdnpoint = "GRANTED";
 
 Future<void> granted({
   required WebSocketChannel socket,
-  required Db dataBase,
   required DbCollection category,
   required DbCollection pending,
   required DbCollection borrow,
@@ -17,8 +16,6 @@ Future<void> granted({
   required dynamic payload,
 }) async {
   try {
-    await dataBase.open();
-
     final adminName = payload['admin'];
     final userName = payload['name'];
     final dateTime = payload['dateTime'];
@@ -124,7 +121,5 @@ Future<void> granted({
   } catch (e, s) {
     print(e);
     print(s);
-  } finally {
-    await dataBase.close();
   }
 }

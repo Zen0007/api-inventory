@@ -10,12 +10,10 @@ const String valueEdnpoint = "WAITPERMISION";
 Future<void> waithPermitAdmin({
   required WebSocketChannel socket,
   required dynamic payload,
-  required Db dataBase,
   required DbCollection borrowing,
   required DbCollection pending,
 }) async {
   try {
-    await dataBase.open();
     final nameUser = payload['name'];
     var result = await borrowing.findOne(where.exists(nameUser));
 
@@ -56,7 +54,5 @@ Future<void> waithPermitAdmin({
   } catch (e, s) {
     print(e);
     print(s);
-  } finally {
-    await dataBase.close();
   }
 }

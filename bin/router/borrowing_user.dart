@@ -15,8 +15,6 @@ Future<void> borrowingItem({
   required dynamic payload,
 }) async {
   try {
-    await dataBase.open();
-
     // type string
     final String nameUser = payload['name'];
     final String classUser = payload['class'];
@@ -93,8 +91,6 @@ Future<void> borrowingItem({
         "warning": {"error": "$e", "StackTrace": "$s"},
       },
     ));
-  } finally {
-    await dataBase.close();
   }
 }
 

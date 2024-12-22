@@ -8,13 +8,10 @@ const String valueEdnpoint = "DELETEITEM";
 
 Future<void> deleteItem({
   required WebSocketChannel socket,
-  required Db dataBase,
   required DbCollection collection,
   required dynamic payload,
 }) async {
   try {
-    await dataBase.open();
-
     final String nameCategory = payload['category'];
     final String indexItem = payload['index'];
 
@@ -58,7 +55,5 @@ Future<void> deleteItem({
         warning: {"error": "$e", "StackTrace": "$s"},
       },
     ));
-  } finally {
-    await dataBase.close();
   }
 }
