@@ -23,17 +23,7 @@ Future<void> granted({
     final findUserInPending = await pending.findOne(where.exists(userName));
     final findUserBorrow = await borrow.findOne(where.exists(userName));
 
-    if (findUserBorrow == null) {
-      socket.sink.add(json.encode(
-        {
-          endpoint: valueEdnpoint,
-          warning: "user not found",
-        },
-      ));
-      return;
-    }
-
-    if (findUserInPending == null) {
+    if (findUserBorrow == null || findUserInPending == null) {
       socket.sink.add(json.encode(
         {
           endpoint: valueEdnpoint,
@@ -90,10 +80,13 @@ Future<void> granted({
     /* update status user in Collection items Back
       update time and add admin 
     */
-    final update = modify
-        .set("$userName.status", "has retrun")
-        .set("$userName.time", "$dateTime")
-        .set("$userName.admin", adminName);
+    final update = {
+      r'$set': {
+        '$userName.status': "has return",
+        '$userName.time': "$dateTime",
+        '$userName.admin': "$adminName",
+      }
+    };
 
     await itemBack.updateMany(where.id(findUserItemBack['_id']), update);
 
