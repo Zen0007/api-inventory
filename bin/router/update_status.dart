@@ -27,7 +27,7 @@ Future<void> updateStatusItem({
       socket.sink.add(json.encode(
         {
           endpoint: valueEdnpoint,
-          "message": "success to update item",
+          "message": "success",
         },
       ));
       return;

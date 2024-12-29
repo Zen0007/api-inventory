@@ -5,7 +5,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 const String endpoint = 'endpoint';
 const String warning = 'warning';
-const String valueEdnpoint = "GETDATACATEGORY";
+const String valueEdnpoint = "GETDATACATEGORYAVAILEBLE";
 
 Future<void> getDataCategoryAvaileble({
   required WebSocketChannel socket,

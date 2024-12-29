@@ -6,7 +6,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 const String endpoint = 'endpoint';
 const String warning = 'warning';
-const String valueEdnpoint = "BORROWING";
+const String valueEndpoint = "BORROWING";
 
 Future<void> borrowingItem({
   required WebSocketChannel socket,
@@ -34,7 +34,7 @@ Future<void> borrowingItem({
         timeBorrow.isEmpty) {
       socket.sink.add(json.encode(
         {
-          endpoint: valueEdnpoint,
+          endpoint: valueEndpoint,
           warning: "missing some field",
         },
       ));
@@ -44,32 +44,36 @@ Future<void> borrowingItem({
     if (imageSelfie.isEmpty) {
       socket.sink.add(json.encode(
         {
-          endpoint: valueEdnpoint,
+          endpoint: valueEndpoint,
           warning: "image is empety",
         },
       ));
       return;
     }
     final hexSelfie = await saveImage(imageSelfie, dataBase);
+    final hexNisn = await saveImage(imageNisn, dataBase);
 
-    final sendData = await collection.insertOne({
-      nameUser: {
-        "name": nameUser,
-        "status": "borrow",
-        "class": classUser,
-        "nisn": nisnUser,
-        "nameTeacher": nameTeacher,
-        "imageSelfie": hexSelfie,
-        "imageNisn": imageNisn ?? "empety",
-        "timeBorrow": timeBorrow,
-        "item": item,
-      }
-    });
+    final sendData = await collection.insertOne(
+      {
+        nameUser: {
+          "name": nameUser,
+          "status": "borrow",
+          "class": classUser,
+          "nisn": nisnUser,
+          "nameTeacher": nameTeacher,
+          "imageSelfie": hexSelfie,
+          "imageNisn": hexNisn,
+          "time": timeBorrow,
+          "admin": "",
+          "items": item,
+        }
+      },
+    );
 
     if (sendData.isSuccess) {
       socket.sink.add(json.encode(
         {
-          endpoint: valueEdnpoint,
+          endpoint: valueEndpoint,
           "message": "success borrow",
         },
       ));
@@ -77,7 +81,7 @@ Future<void> borrowingItem({
     } else {
       socket.sink.add(json.encode(
         {
-          endpoint: valueEdnpoint,
+          endpoint: valueEndpoint,
           warning: "failed while borrow",
         },
       ));
@@ -87,14 +91,17 @@ Future<void> borrowingItem({
     print(s);
     socket.sink.add(json.encode(
       {
-        "endpoint": "DELETEITEM",
+        endpoint: valueEndpoint,
         "warning": {"error": "$e", "StackTrace": "$s"},
       },
     ));
   }
 }
 
-Future<String> saveImage(String image, Db dataBase) async {
+Future<String> saveImage(String? image, Db dataBase) async {
+  if (image == null) {
+    return "empty";
+  }
   final base64Decoder = base64Decode(image);
   final stream = Stream.fromIterable([base64Decoder]);
   final gridFS = GridFS(dataBase);

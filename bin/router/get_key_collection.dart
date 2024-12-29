@@ -30,7 +30,7 @@ Future<void> getDataAllKeyCategory({
         "key": data.keys.firstWhere(
           (key) => key != "_id",
         ),
-        "id": data['_id']['\$oid'],
+        "id": data['_id'].toHexString(),
       });
     }
 

@@ -1,0 +1,96 @@
+i have update some endpoint like borrow user in the how fron end send list item to endpoint borrow 
+i was noticed how to i create this schema 
+ "item": {
+      "accesPoint": {
+        "1": {
+          "label": "no 123",
+          "nameItem": "tp Link",
+          "image": "-",
+          "status": "availeble"
+        },
+        "2": {
+          "label": "no 123",
+          "nameItem": "tp Link",
+          "image": "-",
+          "status": "availeble"
+        }
+      },
+ }
+
+ in shered referend in defferen page collection so i relize i must to user list like this for item user 
+ [
+  {
+    "user": {
+      "status": "borrow",
+      "name": "asta",
+      "class": "xi",
+      "nameTeacher": "yami",
+      "nisn": "12345678",
+      "imageSelfie": "-",
+      "imageStudentCard": "-"
+    },
+    "items": [
+      {
+        "category": "accessPoint",
+        "id": "1",
+        "label": "no 1",
+        "nameItem": "tp Link",
+        "image": "-",
+        "status": "available"
+      },
+      {
+        "category": "accessPoint",
+        "id": "2",
+        "label": "no 24",
+        "nameItem": "tp Link",
+        "image": "-",
+        "status": "available"
+      },
+      {
+        "category": "mikrotick",
+        "id": "1",
+        "label": "no 21",
+        "nameItem": "cisco",
+        "image": "-",
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "user": {
+      "status": "borrow",
+      "name": "yuno",
+      "class": "xi",
+      "nameTeacher": "yami",
+      "nisn": "12345678",
+      "imageSelfie": "-",
+      "imageStudentCard": "-"
+    },
+    "items": [
+      {
+        "category": "accessPoint",
+        "id": "1",
+        "label": "no 123",
+        "nameItem": "tp Link",
+        "image": "-",
+        "status": "available"
+      },
+      {
+        "category": "accessPoint",
+        "id": "2",
+        "label": "no 123",
+        "nameItem": "tp Link",
+        "image": "-",
+        "status": "available"
+      },
+      {
+        "category": "mikrotick",
+        "id": "1",
+        "label": "no 2",
+        "nameItem": "cisco",
+        "image": "-",
+        "status": "available"
+      }
+    ]
+  }
+]

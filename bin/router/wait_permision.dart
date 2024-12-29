@@ -27,13 +27,16 @@ Future<void> waithPermitAdmin({
       return;
     }
 
+    // update status in borrow
     await borrowing.updateOne(
       where.id(result['_id']),
       modify.set("$nameUser.status", "pending"),
     );
 
+    // add data from collection borrow to pending
     await pending.insert(result);
 
+    // find data user in collecton
     final updateStatus = await pending.findOne(where.exists(nameUser));
 
     if (updateStatus == null) {
@@ -42,6 +45,7 @@ Future<void> waithPermitAdmin({
       return;
     }
 
+    // update status for collection pending so andmin can noticed user wait granted admin
     await pending.update(where.id(updateStatus["_id"]),
         modify.set("$nameUser.status", "wait permision"));
 

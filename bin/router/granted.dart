@@ -43,7 +43,12 @@ Future<void> granted({
       return;
     }
 
-    await itemBack.insertOne(findUserBorrow);
+    /*
+        this code insert data form collection pending 
+    */
+    await itemBack.insertOne(findUserInPending);
+
+    // get data in collection itemBack
     final findUserItemBack = await itemBack.findOne(where.exists(userName));
 
     if (findUserItemBack == null) {
@@ -56,46 +61,46 @@ Future<void> granted({
       return;
     }
 
-    final items = findUserInPending[userName]['item'];
-    await itemBack.updateOne(
-      where.id(findUserItemBack['_id']),
-      modify.set(
-        "$userName",
-        {
-          "imageSelfie": items["imageSelfie"],
-          "verifikasi": adminName,
-          "time": dateTime,
-        },
-      ),
-    );
+    //    this get data items fro update status items
+    final itemsUpdateStatus = findUserItemBack[userName]['items'];
 
-    print(items);
+    /* 
+    this code for interation items was borrow user and update
+    status in intems collection category to availeble
+    */
+    for (var status in itemsUpdateStatus) {
+      final categoryName = status['category'];
+      final index = status['id'];
 
-    if (items == null) {
-      socket.sink.add(json.encode(
-        {
-          endpoint: valueEdnpoint,
-          warning: "failed",
-        },
-      ));
-      return;
+      //    this code to get data in collection category
+      final categoryItem = await category.findOne(where.exists(categoryName));
+
+      if (categoryItem != null) {
+        // update status items in collection category
+        await category.updateOne(
+          where.id(categoryItem["_id"]),
+          modify.set(
+            "$categoryName.$index.status",
+            "available",
+          ),
+        );
+      }
     }
 
-    // Iterate over each category in the items
-    items.forEach((categoryKey, itemMap) {
-      itemMap.forEach((itemKey, itemValue) async {
-        // Find the item in the category collection and update its status
-        final categoryItem = await category.findOne(where.exists(categoryKey));
+    /* update status user in Collection items Back
+      update time and add admin 
+    */
+    final update = modify
+        .set("$userName.status", "has retrun")
+        .set("$userName.time", "$dateTime")
+        .set("$userName.admin", adminName);
 
-        if (categoryItem != null) {
-          await category.updateOne(
-            where.id(categoryItem["_id"]),
-            modify.set("$categoryKey.$itemKey.status", "available"),
-          );
-        }
-      });
-    });
+    await itemBack.updateMany(where.id(findUserItemBack['_id']), update);
 
+    /*
+        for saving resources so data user in collction borrow 
+        and in collection pending must be clean 
+    */
     final deleteBorrow =
         await borrow.deleteOne(where.id(findUserBorrow['_id']));
 
