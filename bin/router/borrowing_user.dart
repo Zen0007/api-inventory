@@ -51,7 +51,7 @@ Future<void> borrowingItem({
       return;
     }
 
-    // process data image to hexString
+    // encode Uint8List to json
     final selfieJson = json.encode(imageSelfie);
     final nisnJson = json.encode(imageNisn);
 
