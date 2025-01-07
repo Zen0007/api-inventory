@@ -10,17 +10,18 @@ Future<void> verifikasiToken({
 }) async {
   //this way for chek if  admin token still applies or expired
   try {
-    final String status = payload['token'];
+    final String? status = payload['token'];
     final token = await colection.findOne(where.eq("token", status));
+
     if (token != null) {
-      socket.sink.add(
-          json.encode({"endpoint": "VERIFIKASI", "status": "NOT-VERIFIKASI"}));
+      return;
+    }
+
+    if (status == null) {
       return;
     }
 
     if (status.isEmpty) {
-      socket.sink.add(
-          json.encode({"endpoint": "VERIFIKASI", "status": "NOT-VERIFIKASI"}));
       return;
     }
 
@@ -30,16 +31,10 @@ Future<void> verifikasiToken({
     JWT.verify(status, SecretKey(secretKey));
     socket.sink
         .add(json.encode({"endpoint": "VERIFIKASI", "status": "VERIFIKASI"}));
-
-    print(status);
   } on JWTUndefinedException catch (e) {
     print(e);
-    socket.sink.add(
-        json.encode({"endpoint": "VERIFIKASI", "status": "NOT-VERIFIKASI"}));
   } catch (e, s) {
     print(e);
     print(s);
-    socket.sink.add(
-        json.encode({"endpoint": "VERIFIKASI", "status": "NOT-VERIFIKASI"}));
   }
 }
