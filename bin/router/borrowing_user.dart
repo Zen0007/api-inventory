@@ -50,41 +50,48 @@ Future<void> borrowingItem({
       ));
       return;
     }
+
+    // process data image to hexString
     final hexSelfie = await saveImage(imageSelfie, dataBase);
     final hexNisn = await saveImage(imageNisn, dataBase);
 
-    final sendData = await collection.insertOne(
-      {
-        nameUser: {
-          "name": nameUser,
-          "status": "borrow",
-          "class": classUser,
-          "nisn": nisnUser,
-          "nameTeacher": nameTeacher,
-          "imageSelfie": hexSelfie,
-          "imageNisn": hexNisn,
-          "time": timeBorrow,
-          "admin": "",
-          "items": item,
-        }
-      },
-    );
+    final dataUserBorrow = {
+      nameUser: {
+        "name": nameUser,
+        "status": "borrow",
+        "class": classUser,
+        "nisn": nisnUser,
+        "nameTeacher": nameTeacher,
+        "imageSelfie": hexSelfie,
+        "imageNisn": hexNisn,
+        "time": timeBorrow,
+        "admin": "",
+        "items": item,
+      }
+    };
+
+    // Send data to Database
+    final sendData = await collection.insertOne(dataUserBorrow);
 
     if (sendData.isSuccess) {
-      socket.sink.add(json.encode(
-        {
-          endpoint: valueEndpoint,
-          "message": "success borrow",
-        },
-      ));
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEndpoint,
+            "message": "success",
+          },
+        ),
+      );
       return;
     } else {
-      socket.sink.add(json.encode(
-        {
-          endpoint: valueEndpoint,
-          warning: "failed while borrow",
-        },
-      ));
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEndpoint,
+            warning: "failed while borrow",
+          },
+        ),
+      );
     }
   } catch (e, s) {
     print(e);
@@ -98,6 +105,7 @@ Future<void> borrowingItem({
   }
 }
 
+// convert string to grid mongodb and return hexString
 Future<String> saveImage(String? image, Db dataBase) async {
   if (image == null) {
     return "empty";
