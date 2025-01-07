@@ -16,10 +16,14 @@ Future<void> deleteItem({
     final String indexItem = payload['index'];
 
     if (nameCategory.isEmpty || indexItem.isEmpty) {
-      socket.sink.add(json.encode({
-        endpoint: valueEdnpoint,
-        warning: "missing some field",
-      }));
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            warning: "missing some field",
+          },
+        ),
+      );
       return;
     }
 
@@ -31,20 +35,24 @@ Future<void> deleteItem({
     );
 
     if (deleteItem.isSuccess) {
-      socket.sink.add(json.encode(
-        {
-          endpoint: valueEdnpoint,
-          "message": "success to delete item",
-        },
-      ));
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            "message": "success to delete item",
+          },
+        ),
+      );
       return;
     } else {
-      socket.sink.add(json.encode(
-        {
-          endpoint: valueEdnpoint,
-          warning: "not item delete",
-        },
-      ));
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            warning: "not item delete",
+          },
+        ),
+      );
     }
   } catch (e, s) {
     print(e);
