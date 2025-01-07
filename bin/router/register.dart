@@ -44,8 +44,11 @@ Future<void> addNewAdmin({
       }
     });
 
-    socket.sink.add(json
-        .encode({endpoint: valueEdnpoint, "message": "succes add new admin"}));
+    socket.sink.add(
+      json.encode(
+        {endpoint: valueEdnpoint, "message": "succes add new admin"},
+      ),
+    );
   } catch (e, s) {
     print(e);
     print(s);
