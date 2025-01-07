@@ -62,7 +62,7 @@ Future<void> addItemToInventory({
     // Menentukan key baru yang increment
     String newKey = "${lastKey + 1}";
 
-    final hexImage = await saveImage(image, dataBase);
+    final imageJson = json.encode(image);
 
     // Menambahkan item baru dengan key increment
     final updateCollection = await collection.updateOne(
@@ -73,7 +73,7 @@ Future<void> addItemToInventory({
           'name': nameItem,
           'Label': label,
           "status": "available",
-          'image': hexImage,
+          'image': imageJson,
         },
       ),
     );
