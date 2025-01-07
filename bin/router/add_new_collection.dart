@@ -25,6 +25,7 @@ Future<void> addNewCollection({
       return;
     }
 
+    // add new category to collction
     final result = await collection.findOne(where.exists(newCollection));
 
     if (result != null) {
@@ -37,6 +38,7 @@ Future<void> addNewCollection({
       return;
     }
 
+    // inset empty collction
     await collection.insert({
       newCollection: {},
     });
