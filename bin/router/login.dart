@@ -15,7 +15,8 @@ Future<void> login({
   try {
     final userName = data['name'];
     final password = data['password'];
-    print(userName);
+    print(data);
+    print('\t');
     print(password);
     if (userName == null || password == null) {
       socket.sink.add(json.encode(
@@ -37,6 +38,8 @@ Future<void> login({
       ));
       return;
     }
+
+    print(findUser['password']);
 
     if (findUser[userName]['password'] != password) {
       socket.sink.add(json.encode(
@@ -60,10 +63,16 @@ Future<void> login({
     final jwt = JWT(payload);
     final token = jwt.sign(SecretKey(secretKey));
 
+    print(token);
+
     if (findUser[userName]['password'] == password) {
       socket.sink.add(
         json.encode(
-          {endpoint: valueEdnpoint, "message": token},
+          {
+            endpoint: valueEdnpoint,
+            "message": token,
+            "adminName": userName,
+          },
         ),
       );
     }
