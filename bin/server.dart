@@ -1,26 +1,26 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:mongo_dart/mongo_dart.dart';
-import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'router/register.dart';
+import 'dart:convert';
 import 'router/login.dart';
 import 'router/logout.dart';
+import 'router/granted.dart';
+import 'router/register.dart';
 import 'router/verifikasi.dart';
-import 'router/add_new_collection.dart';
 import 'router/add_new_item.dart';
 import 'router/delete_item.dart';
 import 'router/update_status.dart';
 import 'router/borrowing_user.dart';
-import 'router/chek_user_has_borrow.dart';
 import 'router/wait_permision.dart';
-import 'router/granted.dart';
+import 'router/get_user_granted.dart';
 import 'router/get_borrow_data.dart';
 import 'router/get_pending_data.dart';
 import 'router/get_key_collection.dart';
-import 'router/get_data_all_category.dart';
-import 'router/get_data_back_item.dart';
 import 'router/get_category_data.dart';
+import 'router/add_new_collection.dart';
+import 'router/chek_user_has_borrow.dart';
+import 'router/get_data_all_category.dart';
+import 'package:mongo_dart/mongo_dart.dart';
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 final Set<WebSocketChannel> channel = {};
 
@@ -33,6 +33,7 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
   final expiredToken = dataBase.collection('expiredToken');
   try {
     socket.stream.listen((event) {
+      print(event);
       var data = json.decode(event);
       final endpoint = data['endpoint'];
       final payload = data['data'];
@@ -77,6 +78,7 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
           addItemToInventory(
             socket: socket,
             payload: payload,
+            dataBase: dataBase,
             collection: categoryColection,
           );
           break;
@@ -151,16 +153,16 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             collection: categoryColection,
           );
           break;
-        case "getDataItemBack":
-          getDataBackItem(
-            socket: socket,
-            collection: itemBack,
-          );
-          break;
         case "getDataCollectionAvaileble":
           getDataCategoryAvaileble(
             socket: socket,
             collection: categoryColection,
+          );
+          break;
+        case "getDataGranted":
+          getDataGranted(
+            socket: socket,
+            collection: itemBack,
           );
           break;
         default:
