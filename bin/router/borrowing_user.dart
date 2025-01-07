@@ -52,8 +52,8 @@ Future<void> borrowingItem({
     }
 
     // process data image to hexString
-    final hexSelfie = await saveImage(imageSelfie, dataBase);
-    final hexNisn = await saveImage(imageNisn, dataBase);
+    final selfieJson = json.encode(imageSelfie);
+    final nisnJson = json.encode(imageNisn);
 
     final dataUserBorrow = {
       nameUser: {
@@ -62,8 +62,8 @@ Future<void> borrowingItem({
         "class": classUser,
         "nisn": nisnUser,
         "nameTeacher": nameTeacher,
-        "imageSelfie": hexSelfie,
-        "imageNisn": hexNisn,
+        "imageSelfie": selfieJson,
+        "imageNisn": nisnJson,
         "time": timeBorrow,
         "admin": "",
         "items": item,
