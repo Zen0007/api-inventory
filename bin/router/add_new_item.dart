@@ -17,12 +17,12 @@ Future<void> addItemToInventory({
     final String nameCategory = payload['category'];
     final String nameItem = payload['name'];
     final String label = payload['label'];
-    final image = payload['image'];
+    final String image = payload['image'];
 
     if (nameCategory.isEmpty ||
         nameItem.isEmpty ||
         label.isEmpty ||
-        image == null) {
+        image.isEmpty) {
       socket.sink.add(
         json.encode(
           {
@@ -62,8 +62,6 @@ Future<void> addItemToInventory({
     // Menentukan key baru yang increment
     String newKey = "${lastKey + 1}";
 
-    final imageJson = json.encode(image);
-
     // Menambahkan item baru dengan key increment
     final updateCollection = await collection.updateOne(
       where.id(result['_id']),
@@ -73,7 +71,7 @@ Future<void> addItemToInventory({
           'name': nameItem,
           'Label': label,
           "status": "available",
-          'image': imageJson,
+          'image': image,
         },
       ),
     );

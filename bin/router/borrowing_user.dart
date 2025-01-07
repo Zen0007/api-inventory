@@ -51,10 +51,6 @@ Future<void> borrowingItem({
       return;
     }
 
-    // encode Uint8List to json
-    final selfieJson = json.encode(imageSelfie);
-    final nisnJson = json.encode(imageNisn);
-
     final dataUserBorrow = {
       nameUser: {
         "name": nameUser,
@@ -62,8 +58,8 @@ Future<void> borrowingItem({
         "class": classUser,
         "nisn": nisnUser,
         "nameTeacher": nameTeacher,
-        "imageSelfie": selfieJson,
-        "imageNisn": nisnJson,
+        "imageSelfie": imageSelfie,
+        "imageNisn": imageNisn,
         "time": timeBorrow,
         "admin": "",
         "items": item,
