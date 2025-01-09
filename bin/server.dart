@@ -7,6 +7,8 @@ import 'router/register.dart';
 import 'router/verifikasi.dart';
 import 'router/add_new_item.dart';
 import 'router/delete_item.dart';
+import 'router/delete_category.dart';
+import 'router/delete_gratend_user.dart';
 import 'router/update_status.dart';
 import 'router/borrowing_user.dart';
 import 'router/wait_permision.dart';
@@ -86,6 +88,20 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
           deleteItem(
             socket: socket,
             collection: categoryColection,
+            payload: payload,
+          );
+          break;
+        case "deleteCategory":
+          deleteCategory(
+            socket: socket,
+            collection: categoryColection,
+            payload: payload,
+          );
+          break;
+        case 'deleteUserGratend':
+          deleteUserGratend(
+            socket: socket,
+            collection: itemBack,
             payload: payload,
           );
           break;
