@@ -17,7 +17,7 @@ Future<void> addItemToInventory({
     final String nameCategory = payload['category'];
     final String nameItem = payload['name'];
     final String label = payload['label'];
-    final String image = payload['image'];
+    final List image = payload['image'];
 
     if (nameCategory.isEmpty ||
         nameItem.isEmpty ||
