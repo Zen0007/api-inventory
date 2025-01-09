@@ -23,9 +23,9 @@ Future<void> borrowingItem({
     final String timeBorrow = payload['time'];
 
     // type another string
-    final item = payload['item'];
-    final String imageSelfie = payload['imageSelfie'];
-    final String? imageNisn = payload['imageNisn'];
+    final List? item = payload['items'];
+    final List imageSelfie = payload['imageSelfie'];
+    final List? imageNisn = payload['imageNisn'];
 
     if (nameUser.isEmpty ||
         classUser.isEmpty ||
@@ -35,7 +35,7 @@ Future<void> borrowingItem({
       socket.sink.add(json.encode(
         {
           endpoint: valueEndpoint,
-          warning: "missing some field",
+          warning: "beberapa form kosong harap isi ",
         },
       ));
       return;
@@ -45,13 +45,24 @@ Future<void> borrowingItem({
       socket.sink.add(json.encode(
         {
           endpoint: valueEndpoint,
-          warning: "image is empety",
+          warning: "image kosong",
         },
       ));
       return;
     }
 
-    final dataUserBorrow = {
+    if (item == null) {
+      socket.sink.add(json.encode(
+        {
+          endpoint: valueEndpoint,
+          warning: "barang yang di pinjam kosong silakan isi",
+        },
+      ));
+      return;
+    }
+
+    // Send data to Database
+    final sendData = await collection.insertOne({
       nameUser: {
         "name": nameUser,
         "status": "borrow",
@@ -59,15 +70,12 @@ Future<void> borrowingItem({
         "nisn": nisnUser,
         "nameTeacher": nameTeacher,
         "imageSelfie": imageSelfie,
-        "imageNisn": imageNisn ?? '-',
+        "imageNisn": imageNisn ?? '[]',
         "time": timeBorrow,
         "admin": "",
         "items": item,
       }
-    };
-
-    // Send data to Database
-    final sendData = await collection.insertOne(dataUserBorrow);
+    });
 
     if (sendData.isSuccess) {
       socket.sink.add(
