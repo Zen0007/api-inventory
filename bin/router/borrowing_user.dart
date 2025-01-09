@@ -59,7 +59,7 @@ Future<void> borrowingItem({
         "nisn": nisnUser,
         "nameTeacher": nameTeacher,
         "imageSelfie": imageSelfie,
-        "imageNisn": imageNisn,
+        "imageNisn": imageNisn ?? '-',
         "time": timeBorrow,
         "admin": "",
         "items": item,
