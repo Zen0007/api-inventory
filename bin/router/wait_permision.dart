@@ -14,7 +14,10 @@ Future<void> waithPermitAdmin({
   required DbCollection pending,
 }) async {
   try {
-    final nameUser = payload['name'];
+    final String nameUser = payload['name'];
+    if (nameUser.isEmpty) {
+      return;
+    }
     var result = await borrowing.findOne(where.exists(nameUser));
 
     if (result == null) {
