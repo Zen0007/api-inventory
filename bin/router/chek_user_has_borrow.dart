@@ -14,7 +14,10 @@ Future<void> checkUserIsBorrow({
   required DbCollection collection,
 }) async {
   try {
-    final dataUser = payload['name'];
+    final String dataUser = payload['name'];
+    if (dataUser.isEmpty) {
+      return;
+    }
     final result = await collection.findOne(where.exists(dataUser));
 
     if (result != null) {
@@ -22,7 +25,7 @@ Future<void> checkUserIsBorrow({
         json.encode(
           {
             endpoint: valueEdnpoint,
-            "message": "true",
+            "message": result,
           },
         ),
       );
