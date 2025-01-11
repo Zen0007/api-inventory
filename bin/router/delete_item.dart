@@ -28,11 +28,21 @@ Future<void> deleteItem({
     }
 
     final findIndex = await collection.findOne(where.exists(nameCategory));
-
-    final deleteItem = await collection.updateOne(
-      where.id(findIndex!["_id"]),
-      modify.unset("$nameCategory.$indexItem"),
-    );
+    if (!findIndex![nameCategory].containsKey(indexItem)) {
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            warning: "failde to delete item",
+          },
+        ),
+      );
+    }
+    var update = {
+      '\$unset': {'$nameCategory.$indexItem': ''}
+    };
+    final deleteItem =
+        await collection.updateOne(where.id(findIndex["_id"]), update);
 
     if (deleteItem.isSuccess) {
       socket.sink.add(
