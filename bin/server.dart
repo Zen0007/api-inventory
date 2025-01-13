@@ -20,6 +20,7 @@ import 'router/get_category_data.dart';
 import 'router/add_new_collection.dart';
 import 'router/chek_user_has_borrow.dart';
 import 'router/get_data_all_category.dart';
+import 'router/user_has_Borrow.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -122,6 +123,13 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
           break;
         case "checkUserBorrow":
           checkUserIsBorrow(
+            socket: socket,
+            payload: payload,
+            collection: borrowing,
+          );
+          break;
+        case "hasBorrow":
+          hasBorrow(
             socket: socket,
             payload: payload,
             collection: borrowing,

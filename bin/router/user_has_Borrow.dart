@@ -1,4 +1,3 @@
-//for screen user if has borrow in web user can see item he has borrow
 import 'dart:convert';
 
 import 'package:mongo_dart/mongo_dart.dart';
@@ -6,9 +5,9 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 const String endpoint = 'endpoint';
 const String warning = 'warning';
-const String valueEdnpoint = "CHECKUSER";
+const String valueEdnpoint = "HASBORROW";
 
-Future<void> checkUserIsBorrow({
+Future<void> hasBorrow({
   required WebSocketChannel socket,
   required dynamic payload,
   required DbCollection collection,
@@ -25,7 +24,7 @@ Future<void> checkUserIsBorrow({
         json.encode(
           {
             endpoint: valueEdnpoint,
-            "message": "HASBORROW",
+            "message": result,
           },
         ),
       );

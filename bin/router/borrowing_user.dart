@@ -51,7 +51,7 @@ Future<void> borrowingItem({
       return;
     }
 
-    if (item == null) {
+    if (item == null || item.isEmpty) {
       socket.sink.add(json.encode(
         {
           endpoint: valueEndpoint,
