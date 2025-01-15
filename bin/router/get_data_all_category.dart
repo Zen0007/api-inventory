@@ -13,6 +13,44 @@ Future<void> getDataAllCategory({
 }) async {
   try {
     final data = await collection.find().toList();
+    final List<Map<String, Object>> pipeline = [];
+    final watch = collection.watch(pipeline);
+
+    await for (var status in watch) {
+      if (status.isUpdate ||
+          status.isInsert ||
+          status.isDelete ||
+          status.isReplace ||
+          status.isRename) {
+        socket.sink.add(json.encode(
+          {
+            endpoint: valueEdnpoint,
+            "message": data,
+          },
+        ));
+      } else if (data.isEmpty) {
+        socket.sink.add(json.encode(
+          {
+            endpoint: valueEdnpoint,
+            "message": [],
+          },
+        ));
+        return;
+      }
+    }
+  } catch (e, s) {
+    print(e);
+    print(s);
+  }
+}
+
+// PUT IN ONPRESS
+Future<void> getDataAllCategoryOnce({
+  required WebSocketChannel socket,
+  required DbCollection collection,
+}) async {
+  try {
+    final data = await collection.find().toList();
     if (data.isEmpty) {
       socket.sink.add(json.encode(
         {

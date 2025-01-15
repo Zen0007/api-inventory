@@ -18,6 +18,45 @@ Future<void> hasBorrow({
       return;
     }
     final result = await collection.findOne(where.exists(dataUser));
+    final List<Map<String, Object>> pipeline = [];
+    final watch = collection.watch(pipeline);
+
+    await for (var status in watch) {
+      if (status.isInsert ||
+          status.isUpdate ||
+          status.isRename ||
+          status.isReplace ||
+          status.isDelete) {
+        if (result != null) {
+          socket.sink.add(
+            json.encode(
+              {
+                endpoint: valueEdnpoint,
+                "message": result,
+              },
+            ),
+          );
+          return;
+        }
+      }
+    }
+  } catch (e, s) {
+    print(e);
+    print(s);
+  }
+}
+
+Future<void> hasBorrowOnce({
+  required WebSocketChannel socket,
+  required dynamic payload,
+  required DbCollection collection,
+}) async {
+  try {
+    final String dataUser = payload['name'];
+    if (dataUser.isEmpty) {
+      return;
+    }
+    final result = await collection.findOne(where.exists(dataUser));
 
     if (result != null) {
       socket.sink.add(
