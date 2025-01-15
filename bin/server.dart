@@ -20,7 +20,7 @@ import 'router/get_category_data.dart';
 import 'router/add_new_collection.dart';
 import 'router/chek_user_has_borrow.dart';
 import 'router/get_data_all_category.dart';
-import 'router/user_has_Borrow.dart';
+import 'router/user_has_borrow.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -135,6 +135,13 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             collection: borrowing,
           );
           break;
+        case "hasBorrowOnce":
+          hasBorrowOnce(
+            socket: socket,
+            payload: payload,
+            collection: borrowing,
+          );
+          break;
         case "waitPermision":
           waithPermitAdmin(
             socket: socket,
@@ -159,8 +166,20 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             collection: categoryColection,
           );
           break;
+        case "getDataAllCollectionOnce":
+          getDataAllCategoryOnce(
+            socket: socket,
+            collection: categoryColection,
+          );
+          break;
         case "getDataBorrow":
           getDataBorrow(
+            socket: socket,
+            collection: borrowing,
+          );
+          break;
+        case "getDataBorrowOnce":
+          getDataBorrowOnce(
             socket: socket,
             collection: borrowing,
           );
@@ -171,10 +190,10 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             collection: pending,
           );
           break;
-        case "getAllKeyCategory":
-          getDataAllKeyCategory(
+        case "getDataPendingOnce":
+          getDataPendingOnce(
             socket: socket,
-            collection: categoryColection,
+            collection: pending,
           );
           break;
         case "getDataCollectionAvaileble":
@@ -183,10 +202,28 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             collection: categoryColection,
           );
           break;
+        case "getDataCollectionAvailebleOnce":
+          getDataCategoryAvailebleOnce(
+            socket: socket,
+            collection: categoryColection,
+          );
+          break;
         case "getDataGranted":
           getDataGranted(
             socket: socket,
             collection: itemBack,
+          );
+          break;
+        case "getDataGrantedOnce":
+          getDataGrantedOnce(
+            socket: socket,
+            collection: itemBack,
+          );
+          break;
+        case "getAllKeyCategory":
+          getDataAllKeyCategory(
+            socket: socket,
+            collection: categoryColection,
           );
           break;
         default:
