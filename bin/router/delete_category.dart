@@ -28,18 +28,32 @@ Future<void> deleteCategory({
 
     final findIndex = await collection.findOne(where.exists(nameCategory));
 
-    var update = {
-      '\$unset': {nameCategory: ''}
-    };
-    final deleteItem =
-        await collection.updateOne(where.id(findIndex!["_id"]), update);
+    if (findIndex == null) {
+      socket.sink.add(json.encode(
+        {
+          endpoint: valueEdnpoint,
+          warning: "category not exist",
+        },
+      ));
+      return;
+    }
+    findIndex.forEach((categoryName, value) {
+      if (categoryName != '_id') {
+        checkIfCategoryIsSafeForDelete(value, socket);
+        return;
+      }
+    });
+
+    final deleteItem = await collection.deleteOne(
+      where.id(findIndex["_id"]),
+    );
 
     if (deleteItem.isSuccess) {
       socket.sink.add(
         json.encode(
           {
             endpoint: valueEdnpoint,
-            "message": "success to delete item",
+            "message": "success to delete category",
           },
         ),
       );
@@ -63,5 +77,19 @@ Future<void> deleteCategory({
         warning: {"error": "$e", "StackTrace": "$s"},
       },
     ));
+  }
+}
+
+void checkIfCategoryIsSafeForDelete(dynamic value, WebSocketChannel socket) {
+  if (value.length >= 5) {
+    socket.sink.add(
+      json.encode(
+        {
+          endpoint: valueEdnpoint,
+          warning:
+              "documnets value is not safe for delete make sure value less from 5",
+        },
+      ),
+    );
   }
 }
