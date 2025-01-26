@@ -7,7 +7,7 @@ const String endpoint = 'endpoint';
 const String warning = 'warning';
 const String valueEdnpoint = "HASBORROW";
 
-Future<void> hasBorrow({
+Future<void> userHasBorrow({
   required WebSocketChannel socket,
   required dynamic payload,
   required DbCollection collection,
@@ -46,7 +46,7 @@ Future<void> hasBorrow({
   }
 }
 
-Future<void> hasBorrowOnce({
+Future<void> userHasBorrowOnce({
   required WebSocketChannel socket,
   required dynamic payload,
   required DbCollection collection,
