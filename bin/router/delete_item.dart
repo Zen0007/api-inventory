@@ -28,7 +28,7 @@ Future<void> deleteItem({
     }
 
     final findIndex = await collection.findOne(where.exists(nameCategory));
-    if (!findIndex![nameCategory].containsKey(indexItem)) {
+    if (findIndex == null) {
       socket.sink.add(
         json.encode(
           {
@@ -37,6 +37,18 @@ Future<void> deleteItem({
           },
         ),
       );
+      return;
+    }
+    if (!findIndex[nameCategory].containsKey(indexItem)) {
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            warning: "failde to delete item",
+          },
+        ),
+      );
+      return;
     }
     var update = {
       '\$unset': {'$nameCategory.$indexItem': ''}
