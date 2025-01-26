@@ -129,14 +129,14 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
           );
           break;
         case "hasBorrow":
-          hasBorrow(
+          userHasBorrow(
             socket: socket,
             payload: payload,
             collection: borrowing,
           );
           break;
         case "hasBorrowOnce":
-          hasBorrowOnce(
+          userHasBorrowOnce(
             socket: socket,
             payload: payload,
             collection: borrowing,
