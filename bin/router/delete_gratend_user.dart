@@ -27,18 +27,22 @@ Future<void> deleteUserGratend({
     }
 
     final findIndex = await collection.findOne(where.exists(nameUser));
-
-    final deleteItem = await collection.updateOne(
-      where.id(findIndex!["_id"]),
-      modify.unset(nameUser),
-    );
+    if (findIndex == null) {
+      socket.sink.add(json.encode({
+        endpoint: valueEdnpoint,
+        warning: "user  not exist",
+      }));
+      return;
+    }
+    print(findIndex);
+    final deleteItem = await collection.deleteOne(where.id(findIndex["_id"]));
 
     if (deleteItem.isSuccess) {
       socket.sink.add(
         json.encode(
           {
             endpoint: valueEdnpoint,
-            "message": "success to delete item",
+            "message": "success to delete user",
           },
         ),
       );
