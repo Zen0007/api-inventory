@@ -1,5 +1,5 @@
+// ignore: file_names
 import 'dart:convert';
-
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -15,7 +15,7 @@ Future<void> userHasBorrow({
   try {
     final String dataUser = payload['name'];
     if (dataUser.isEmpty) {
-      return;
+      return; // prevent if name user in local storage is emptry
     }
     final result = await collection.findOne(where.exists(dataUser));
     final List<Map<String, Object>> pipeline = [];
@@ -27,17 +27,15 @@ Future<void> userHasBorrow({
           status.isRename ||
           status.isReplace ||
           status.isDelete) {
-        if (result != null) {
-          socket.sink.add(
-            json.encode(
-              {
-                endpoint: valueEdnpoint,
-                "message": result,
-              },
-            ),
-          );
-          return;
-        }
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": result,
+            },
+          ),
+        );
+        return;
       }
     }
   } catch (e, s) {
@@ -54,7 +52,7 @@ Future<void> userHasBorrowOnce({
   try {
     final String dataUser = payload['name'];
     if (dataUser.isEmpty) {
-      return;
+      return; // prevent if name user in local storage is emptry
     }
     final result = await collection.findOne(where.exists(dataUser));
 
