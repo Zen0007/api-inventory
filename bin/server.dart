@@ -28,6 +28,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 final Set<WebSocketChannel> channel = {};
 
 void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
+  int start1 = DateTime.now().millisecond;
   final categoryColection = dataBase.collection('category');
   final authAdmin = dataBase.collection('authAdmin');
   final borrowing = dataBase.collection('borrowing');
@@ -35,225 +36,240 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
   final pending = dataBase.collection('pendingReturn');
   final expiredToken = dataBase.collection('expiredToken');
   try {
-    socket.stream.listen((event) {
-      print(event);
-      var data = json.decode(event);
-      final endpoint = data['endpoint'];
-      final payload = data['data'];
+    socket.stream.listen(
+      (event) {
+        print("event handleWs $event");
+        var data = json.decode(event);
+        final endpoint = data['endpoint'];
+        final payload = data['data'];
 
-      switch (endpoint) {
-        case "register":
-          addNewAdmin(
-            payload: payload,
-            socket: socket,
-            authAdmin: authAdmin,
-          );
-          break;
-        case "login":
-          login(
-            collection: authAdmin,
-            data: payload,
-            socket: socket,
-          );
-          break;
-        case "logout":
-          logout(
-            payload: payload,
-            socket: socket,
-            colection: expiredToken,
-          );
-          break;
-        case "verifikasi":
-          verifikasiToken(
-            colection: expiredToken,
-            payload: payload,
-            socket: socket,
-          );
-          break;
-        case "newCollection":
-          addNewCollection(
-            socket: socket,
-            payload: payload,
-            collection: categoryColection,
-          );
-          break;
-        case "newItem":
-          addItemToInventory(
-            socket: socket,
-            payload: payload,
-            dataBase: dataBase,
-            collection: categoryColection,
-          );
-          break;
-        case "deleteItem":
-          deleteItem(
-            socket: socket,
-            collection: categoryColection,
-            payload: payload,
-          );
-          break;
-        case "deleteCategory":
-          deleteCategory(
-            socket: socket,
-            collection: categoryColection,
-            payload: payload,
-          );
-          break;
-        case 'deleteUserGratend':
-          deleteUserGratend(
-            socket: socket,
-            collection: itemBack,
-            payload: payload,
-          );
-          break;
-        case "updateStatusItem":
-          updateStatusItem(
-            socket: socket,
-            collection: categoryColection,
-            payload: payload,
-          );
-          break;
-        case "borrowing":
-          borrowingItem(
-            socket: socket,
-            dataBase: dataBase,
-            collection: borrowing,
-            payload: payload,
-          );
-          break;
-        case "checkUserBorrow":
-          checkUserIsBorrow(
-            socket: socket,
-            payload: payload,
-            collection: borrowing,
-          );
-          break;
-        case "hasBorrow":
-          userHasBorrow(
-            socket: socket,
-            payload: payload,
-            collection: borrowing,
-          );
-          break;
-        case "hasBorrowOnce":
-          userHasBorrowOnce(
-            socket: socket,
-            payload: payload,
-            collection: borrowing,
-          );
-          break;
-        case "waitPermision":
-          waithPermitAdmin(
-            socket: socket,
-            payload: payload,
-            borrowing: borrowing,
-            pending: pending,
-          );
-          break;
-        case "granted":
-          granted(
-            socket: socket,
-            category: categoryColection,
-            pending: pending,
-            borrow: borrowing,
-            itemBack: itemBack,
-            payload: payload,
-          );
-          break;
-        case "getDataAllCollection":
-          getDataAllCategory(
-            socket: socket,
-            collection: categoryColection,
-          );
-          break;
-        case "getDataAllCollectionOnce":
-          getDataAllCategoryOnce(
-            socket: socket,
-            collection: categoryColection,
-          );
-          break;
-        case "getDataBorrow":
-          getDataBorrow(
-            socket: socket,
-            collection: borrowing,
-          );
-          break;
-        case "getDataBorrowOnce":
-          getDataBorrowOnce(
-            socket: socket,
-            collection: borrowing,
-          );
-          break;
-        case "getDataPending":
-          getDataPending(
-            socket: socket,
-            collection: pending,
-          );
-          break;
-        case "getDataPendingOnce":
-          getDataPendingOnce(
-            socket: socket,
-            collection: pending,
-          );
-          break;
-        case "getDataCollectionAvaileble":
-          getDataCategoryAvaileble(
-            socket: socket,
-            collection: categoryColection,
-          );
-          break;
-        case "getDataCollectionAvailebleOnce":
-          getDataCategoryAvailebleOnce(
-            socket: socket,
-            collection: categoryColection,
-          );
-          break;
-        case "getDataGranted":
-          getDataGranted(
-            socket: socket,
-            collection: itemBack,
-          );
-          break;
-        case "getDataGrantedOnce":
-          getDataGrantedOnce(
-            socket: socket,
-            collection: itemBack,
-          );
-          break;
-        case "getAllKeyCategory":
-          getDataAllKeyCategory(
-            socket: socket,
-            collection: categoryColection,
-          );
-          break;
-        default:
-          socket.sink.add(json.encode(
-            {
-              "endpoint": "ERROR",
-              "error": "endpoint not found",
-            },
-          ));
-      }
-    }, onDone: () {
-      channel.remove(socket);
-      socket.sink.close();
-      print("is close");
-    }, onError: (e) {
-      channel.remove(socket);
-      socket.sink.close();
-      print('on error');
-      print(e);
-    });
+        switch (endpoint) {
+          case "register":
+            addNewAdmin(
+              payload: payload,
+              socket: socket,
+              authAdmin: authAdmin,
+            );
+            break;
+          case "login":
+            login(
+              collection: authAdmin,
+              data: payload,
+              socket: socket,
+            );
+            break;
+          case "logout":
+            logout(
+              payload: payload,
+              socket: socket,
+              colection: expiredToken,
+            );
+            break;
+          case "verifikasi":
+            verifikasiToken(
+              colection: expiredToken,
+              payload: payload,
+              socket: socket,
+            );
+            break;
+          case "newCollection":
+            addNewCollection(
+              socket: socket,
+              payload: payload,
+              collection: categoryColection,
+            );
+            break;
+          case "newItem":
+            addItemToInventory(
+              socket: socket,
+              payload: payload,
+              dataBase: dataBase,
+              collection: categoryColection,
+            );
+            break;
+          case "deleteItem":
+            deleteItem(
+              socket: socket,
+              collection: categoryColection,
+              payload: payload,
+            );
+            break;
+          case "deleteCategory":
+            deleteCategory(
+              socket: socket,
+              collection: categoryColection,
+              payload: payload,
+            );
+            break;
+          case 'deleteUserGratend':
+            deleteUserGratend(
+              socket: socket,
+              collection: itemBack,
+              payload: payload,
+            );
+            break;
+          case "updateStatusItem":
+            updateStatusItem(
+              socket: socket,
+              collection: categoryColection,
+              payload: payload,
+            );
+            break;
+          case "borrowing":
+            borrowingItem(
+              socket: socket,
+              dataBase: dataBase,
+              collection: borrowing,
+              payload: payload,
+            );
+            break;
+          case "checkUserBorrow":
+            checkUserIsBorrow(
+              socket: socket,
+              payload: payload,
+              collection: borrowing,
+            );
+            break;
+          case "hasBorrow":
+            userHasBorrow(
+              socket: socket,
+              payload: payload,
+              collection: borrowing,
+            );
+            break;
+          case "hasBorrowOnce":
+            userHasBorrowOnce(
+              socket: socket,
+              payload: payload,
+              collection: borrowing,
+            );
+            break;
+          case "waitPermision":
+            waithPermitAdmin(
+              socket: socket,
+              payload: payload,
+              borrowing: borrowing,
+              pending: pending,
+            );
+            break;
+          case "granted":
+            granted(
+              socket: socket,
+              category: categoryColection,
+              pending: pending,
+              borrow: borrowing,
+              itemBack: itemBack,
+              payload: payload,
+            );
+            break;
+
+          case "getDataBorrow":
+            getDataBorrow(
+              socket: socket,
+              collection: borrowing,
+            );
+            break;
+          case "getDataBorrowOnce":
+            getDataBorrowOnce(
+              socket: socket,
+              collection: borrowing,
+            );
+            break;
+          case "getDataPending":
+            getDataPending(
+              socket: socket,
+              collection: pending,
+            );
+            break;
+          case "getDataPendingOnce":
+            getDataPendingOnce(
+              socket: socket,
+              collection: pending,
+            );
+            break;
+          case "getDataAllCollection":
+            getDataAllCategory(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          case "getDataAllCollectionOnce":
+            getDataAllCategoryOnce(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          case "getDataCollectionAvaileble":
+            getDataCategoryAvaileble(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          case "getDataCollectionAvailebleOnce":
+            getDataCategoryAvailebleOnce(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          case "getDataGranted":
+            getDataGranted(
+              socket: socket,
+              collection: itemBack,
+            );
+            break;
+          case "getDataGrantedOnce":
+            getDataGrantedOnce(
+              socket: socket,
+              collection: itemBack,
+            );
+            break;
+          case "getAllKeyCategory":
+            getAllKeyCategory(
+              collection: categoryColection,
+              socket: socket,
+            );
+            break;
+          case "getAllKeyCategoryOnce":
+            getDataAllKeyCategoryOnce(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          default:
+            socket.sink.add(json.encode(
+              {
+                "endpoint": "ERROR",
+                "error": "endpoint not found",
+              },
+            ));
+        }
+
+        int end1 = DateTime.now().millisecond;
+        int result1 = start1 - end1;
+        print(('${result1 * -1} execution code time handelWs'));
+      },
+      onDone: () {
+        channel.remove(socket);
+        print("is close");
+      },
+      onError: (e) {
+        channel.remove(socket);
+        print('on error $e');
+        socket.sink.close();
+      },
+    );
   } catch (e, s) {
-    print(e);
+    print("error in handelws $e");
     print(s);
   }
 }
 
 void main(List<String> args) async {
   try {
-    final server = await HttpServer.bind('127.0.0.1', 8080);
+    final int port = 8080;
+    final server = await HttpServer.bind('127.0.0.1', port);
     print('webSocker listening on ws:/$server');
+    print("port ${server.address}");
 
     final Db dataBase = Db('mongodb://localhost:27017/inventory');
     await dataBase.open();
@@ -261,6 +277,7 @@ void main(List<String> args) async {
       if (request.uri.path == '/ws') {
         final socket = await WebSocketTransformer.upgrade(request);
         final chanel = IOWebSocketChannel(socket);
+
         channel.add(chanel);
         handleWebSocket(chanel, dataBase);
       } else {
