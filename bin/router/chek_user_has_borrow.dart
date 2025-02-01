@@ -16,7 +16,7 @@ Future<void> checkUserIsBorrow({
   try {
     final String dataUser = payload['name'];
     if (dataUser.isEmpty) {
-      return;
+      return; // prevent if name user in local storage is emptry
     }
     final result = await collection.findOne(where.exists(dataUser));
 
