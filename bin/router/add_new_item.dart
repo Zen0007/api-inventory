@@ -13,16 +13,14 @@ Future<void> addItemToInventory({
   required Db dataBase,
   required DbCollection collection,
 }) async {
+  int start1 = DateTime.now().millisecond;
   try {
     final String nameCategory = payload['category'];
     final String nameItem = payload['name'];
     final String label = payload['label'];
     final List image = payload['image'];
 
-    if (nameCategory.isEmpty ||
-        nameItem.isEmpty ||
-        label.isEmpty ||
-        image.isEmpty) {
+    if (nameCategory.isEmpty || nameItem.isEmpty || label.isEmpty) {
       socket.sink.add(
         json.encode(
           {
@@ -37,7 +35,7 @@ Future<void> addItemToInventory({
     // find category
     final result = await collection.findOne(where.exists(nameCategory));
 
-    if (result == null && result![nameCategory] == null) {
+    if (result == null) {
       print("the category is not exists ");
       socket.sink.add(
         json.encode(
@@ -86,6 +84,10 @@ Future<void> addItemToInventory({
           },
         ),
       );
+
+      int end1 = DateTime.now().millisecond;
+      int result1 = start1 - end1;
+      print(('${result1 * -1} execution code time add new item'));
       return;
     } else {
       print('No document found with that _id or no changes made');
@@ -102,16 +104,4 @@ Future<void> addItemToInventory({
     print(e);
     print(s);
   }
-}
-
-Future<String> saveImage(String? image, Db dataBase) async {
-  if (image == null) {
-    return "empty";
-  }
-  final base64Decoder = base64Decode(image);
-  final stream = Stream.fromIterable([base64Decoder]);
-  final gridFS = GridFS(dataBase);
-  final gridIn = gridFS.createFile(stream, 'image.jpg');
-  await gridIn.save();
-  return gridIn.id.toHexString();
 }
