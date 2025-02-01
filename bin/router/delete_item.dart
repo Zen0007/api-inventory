@@ -12,6 +12,7 @@ Future<void> deleteItem({
   required dynamic payload,
 }) async {
   try {
+    int start1 = DateTime.now().millisecond;
     final String nameCategory = payload['category'];
     final String indexItem = payload['index'];
 
@@ -65,6 +66,9 @@ Future<void> deleteItem({
           },
         ),
       );
+      int end1 = DateTime.now().millisecond;
+      int result1 = start1 - end1;
+      print(('${result1 * -1} execution code time Delete item'));
       return;
     } else {
       socket.sink.add(
