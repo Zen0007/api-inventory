@@ -108,16 +108,3 @@ Future<void> borrowingItem({
     ));
   }
 }
-
-// convert string to grid mongodb and return hexString
-Future<String> saveImage(String? image, Db dataBase) async {
-  if (image == null) {
-    return "empty";
-  }
-  final base64Decoder = base64Decode(image);
-  final stream = Stream.fromIterable([base64Decoder]);
-  final gridFS = GridFS(dataBase);
-  final gridIn = gridFS.createFile(stream, 'image.jpg');
-  await gridIn.save();
-  return gridIn.id.toHexString();
-}
