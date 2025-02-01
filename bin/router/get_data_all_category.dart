@@ -11,30 +11,35 @@ Future<void> getDataAllCategory({
   required WebSocketChannel socket,
   required DbCollection collection,
 }) async {
+  int start1 = DateTime.now().millisecond;
   try {
     final data = await collection.find().toList();
+    if (data.isEmpty) {
+      return; // prevent for exsecute code below
+    }
+
     final List<Map<String, Object>> pipeline = [];
     final watch = collection.watch(pipeline);
 
     await for (var status in watch) {
-      if (status.isUpdate ||
-          status.isInsert ||
-          status.isDelete ||
-          status.isReplace ||
-          status.isRename) {
-        socket.sink.add(json.encode(
-          {
-            endpoint: valueEdnpoint,
-            "message": data,
-          },
-        ));
-      } else if (data.isEmpty) {
-        socket.sink.add(json.encode(
-          {
-            endpoint: valueEdnpoint,
-            "message": [],
-          },
-        ));
+      print("is delete ${status.isDelete}");
+      print("is insert ${status.isInsert}");
+      print("is update ${status.isUpdate}");
+      print("event change $status");
+      if (status.isUpdate || status.isInsert || status.isDelete) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": data,
+            },
+          ),
+        );
+
+        int end1 = DateTime.now().millisecond;
+        int result1 = start1 - end1;
+        print(('${result1 * -1}  Listener databse all category'));
+
         return;
       }
     }
@@ -49,24 +54,19 @@ Future<void> getDataAllCategoryOnce({
   required WebSocketChannel socket,
   required DbCollection collection,
 }) async {
+  int start1 = DateTime.now().millisecond;
   try {
     final data = await collection.find().toList();
-    if (data.isEmpty) {
-      socket.sink.add(json.encode(
-        {
-          endpoint: valueEdnpoint,
-          "message": [],
-        },
-      ));
-      return;
-    }
-
     socket.sink.add(json.encode(
       {
         endpoint: valueEdnpoint,
         "message": data,
       },
     ));
+
+    int end1 = DateTime.now().millisecond;
+    int result1 = start1 - end1;
+    print(('$result1 execution code time all Category'));
   } catch (e, s) {
     print(e);
     print(s);

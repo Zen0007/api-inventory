@@ -12,30 +12,22 @@ Future<void> getDataPending({
   required DbCollection collection,
 }) async {
   try {
-    final getData = await collection.find().toList();
+    final data = await collection.find().toList();
+    if (data.isEmpty) {
+      return; // prevent for exsecute code below
+    }
     final List<Map<String, Object>> pipeline = [];
     final watch = collection.watch(pipeline);
-
     await for (var status in watch) {
-      if (status.isUpdate ||
-          status.isInsert ||
-          status.isDelete ||
-          status.isReplace ||
-          status.isRename) {
-        socket.sink.add(json.encode(
-          {
-            endpoint: valueEdnpoint,
-            "message": getData,
-          },
-        ));
-      } else if (getData.isEmpty) {
-        socket.sink.add(json.encode(
-          {
-            endpoint: valueEdnpoint,
-            "message": [],
-          },
-        ));
-        return;
+      if (status.isUpdate || status.isInsert || status.isDelete) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": data,
+            },
+          ),
+        );
       }
     }
   } catch (e, s) {
@@ -50,16 +42,6 @@ Future<void> getDataPendingOnce({
 }) async {
   try {
     final getData = await collection.find().toList();
-    if (getData.isEmpty) {
-      socket.sink.add(json.encode(
-        {
-          endpoint: valueEdnpoint,
-          "message": [],
-        },
-      ));
-      return;
-    }
-
     socket.sink.add(json.encode(
       {
         endpoint: valueEdnpoint,

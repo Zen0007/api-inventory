@@ -14,12 +14,14 @@ Future<void> getDataCategoryAvailebleOnce({
   try {
     final data = await collection.find().toList();
     if (data.isEmpty) {
-      socket.sink.add(json.encode(
-        {
-          endpoint: valueEdnpoint,
-          "message": [],
-        },
-      ));
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            "message": [],
+          },
+        ),
+      );
       return;
     }
 
@@ -68,6 +70,10 @@ Future<void> getDataCategoryAvaileble({
 }) async {
   try {
     final data = await collection.find().toList();
+    if (data.isEmpty) {
+      return; // prevent for exsecute code below
+    }
+
     final List<Map<String, Object>> pipeline = [];
     final watch = collection.watch(pipeline);
 
@@ -81,12 +87,16 @@ Future<void> getDataCategoryAvaileble({
         if (key == '_id') {
           filteredItem[key] = value;
         } else if (value is Map) {
+          // temporary hold value index
           Map<String, dynamic> filteredSubItem = {};
-          value.forEach((subKey, subValue) {
-            if (subValue['status'] == 'available') {
-              filteredSubItem[subKey] = subValue;
-            }
-          });
+          value.forEach(
+            (subKey, subValue) {
+              if (subValue['status'] == 'available') {
+                // if index item is available value item add to filteredItem
+                filteredSubItem[subKey] = subValue;
+              }
+            },
+          );
           if (filteredSubItem.isNotEmpty) {
             filteredItem[key] = filteredSubItem;
           }
@@ -97,28 +107,16 @@ Future<void> getDataCategoryAvaileble({
         filteredData.add(filteredItem);
       }
     }
-
     await for (var status in watch) {
-      if (status.isInsert ||
-          status.isUpdate ||
-          status.isReplace ||
-          status.isRename ||
-          status.isDelete) {
-        socket.sink.add(json.encode(
-          {
-            endpoint: valueEdnpoint,
-            "message": filteredData,
-          },
-        ));
-        return;
-      } else if (data.isEmpty) {
-        socket.sink.add(json.encode(
-          {
-            endpoint: valueEdnpoint,
-            "message": [],
-          },
-        ));
-        return;
+      if (status.isInsert || status.isUpdate || status.isDelete) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": filteredData,
+            },
+          ),
+        );
       }
     }
   } catch (e, s) {
