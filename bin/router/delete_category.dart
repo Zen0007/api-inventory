@@ -39,7 +39,18 @@ Future<void> deleteCategory({
     }
     findIndex.forEach((categoryName, value) {
       if (categoryName != '_id') {
-        checkIfCategoryIsSafeForDelete(value, socket);
+        if (value.length >= 5) {
+          socket.sink.add(
+            json.encode(
+              {
+                endpoint: valueEdnpoint,
+                warning:
+                    "documnets value is not safe for delete make sure value less from 5",
+              },
+            ),
+          );
+        }
+
         return;
       }
     });
@@ -77,19 +88,5 @@ Future<void> deleteCategory({
         warning: {"error": "$e", "StackTrace": "$s"},
       },
     ));
-  }
-}
-
-void checkIfCategoryIsSafeForDelete(dynamic value, WebSocketChannel socket) {
-  if (value.length >= 5) {
-    socket.sink.add(
-      json.encode(
-        {
-          endpoint: valueEdnpoint,
-          warning:
-              "documnets value is not safe for delete make sure value less from 5",
-        },
-      ),
-    );
   }
 }
