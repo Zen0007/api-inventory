@@ -48,9 +48,6 @@ Future<void> addNewCollection({
         "message": "success add new category",
       },
     ));
-
-    print(newCollection);
-    print(result);
   } catch (e, s) {
     print(e);
     print(s);
