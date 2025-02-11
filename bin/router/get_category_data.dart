@@ -107,18 +107,40 @@ Future<void> getDataCategoryAvaileble({
         filteredData.add(filteredItem);
       }
     }
-    await for (var status in watch) {
-      if (status.isInsert || status.isUpdate || status.isDelete) {
+
+    watch.listen((status) async {
+      final updateData = await collection.find().toList();
+      if (status.isUpdate) {
         socket.sink.add(
           json.encode(
             {
               endpoint: valueEdnpoint,
-              "message": filteredData,
+              "message": updateData,
             },
           ),
         );
       }
-    }
+      if (status.isInsert) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": updateData,
+            },
+          ),
+        );
+      }
+      if (status.isDelete) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": updateData,
+            },
+          ),
+        );
+      }
+    });
   } catch (e, s) {
     print('$e get data availeble');
     print(s);

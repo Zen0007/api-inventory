@@ -21,28 +21,43 @@ Future<void> getDataAllCategory({
     final List<Map<String, Object>> pipeline = [];
     final watch = collection.watch(pipeline);
 
-    await for (var status in watch) {
-      print("is delete ${status.isDelete}");
-      print("is insert ${status.isInsert}");
-      print("is update ${status.isUpdate}");
-      print("event change $status");
-      if (status.isUpdate || status.isInsert || status.isDelete) {
+    watch.listen((status) async {
+      final updateData = await collection.find().toList();
+
+      if (status.isUpdate) {
         socket.sink.add(
           json.encode(
             {
               endpoint: valueEdnpoint,
-              "message": data,
+              "message": updateData,
             },
           ),
         );
-
-        int end1 = DateTime.now().millisecond;
-        int result1 = start1 - end1;
-        print(('${result1 * -1}  Listener databse all category'));
-
-        return;
       }
-    }
+      if (status.isInsert) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": updateData,
+            },
+          ),
+        );
+      }
+      if (status.isDelete) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": updateData,
+            },
+          ),
+        );
+      }
+    });
+    int end1 = DateTime.now().millisecond;
+    int result1 = start1 - end1;
+    print(('$result1 execution code time all Category'));
   } catch (e, s) {
     print(e);
     print(s);

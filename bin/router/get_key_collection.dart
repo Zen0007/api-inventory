@@ -61,36 +61,30 @@ Future<void> getAllKeyCategory({
   required WebSocketChannel socket,
   required DbCollection collection,
 }) async {
-  int start1 = DateTime.now().millisecond;
   final data = await collection.find().toList();
   if (data.isEmpty) {
     return; // prevent for exsecute code below
   }
 
-  final List<Map> list = [];
-
-  for (var data in data) {
-    list.add(
-      {
-        "key": data.keys.firstWhere(
-          (key) => key != "_id",
-        ),
-        "id": data['_id'].toHexString(),
-      },
-    );
-  }
-
   try {
     final List<Map<String, Object>> pipeline = [];
     final watch = collection.watch(pipeline);
-    await for (var status in watch) {
-      print("is delete ${status.isDelete}");
-      print("is insert ${status.isInsert}");
-      print("is update ${status.isUpdate}");
-      print("fullDocument ${status.fullDocument}");
-      print("documentKey ${status.documentKey}");
 
-      if (status.isUpdate || status.isInsert || status.isDelete) {
+    watch.listen((status) async {
+      final updateData = await collection.find().toList();
+      final List<Map> list = [];
+
+      for (var data in updateData) {
+        list.add(
+          {
+            "key": data.keys.firstWhere(
+              (key) => key != "_id",
+            ),
+            "id": data['_id'].toHexString(),
+          },
+        );
+      }
+      if (status.isUpdate) {
         socket.sink.add(
           json.encode(
             {
@@ -99,14 +93,28 @@ Future<void> getAllKeyCategory({
             },
           ),
         );
-
-        int end1 = DateTime.now().millisecond;
-        int result1 = start1 - end1;
-        print(('${result1 * -1}  Listener databse all category key'));
-
-        return;
       }
-    }
+      if (status.isInsert) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": list,
+            },
+          ),
+        );
+      }
+      if (status.isDelete) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": list,
+            },
+          ),
+        );
+      }
+    });
   } catch (e, s) {
     print(e);
     print(s);
