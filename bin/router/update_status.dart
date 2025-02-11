@@ -17,9 +17,20 @@ Future<void> updateStatusItem({
     final indexItem = payload['index'];
 
     final findIndex = await collection.findOne(where.exists(nameCategory));
+    print(findIndex);
+    if (findIndex![nameCategory][indexItem] == null) {
+      return socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            "message": "failed to update status",
+          },
+        ),
+      );
+    }
 
     final updateStatusItem = await collection.updateOne(
-      where.id(findIndex!["_id"]),
+      where.id(findIndex["_id"]),
       modify.set("$nameCategory.$indexItem.status", "borrow"),
     );
 
