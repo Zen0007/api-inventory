@@ -66,25 +66,45 @@ Future<void> getAllKeyCategory({
     return; // prevent for exsecute code below
   }
 
-  final List<Map> list = [];
-
-  for (var data in data) {
-    list.add(
-      {
-        "key": data.keys.firstWhere(
-          (key) => key != "_id",
-        ),
-        "id": data['_id'].toHexString(),
-      },
-    );
-  }
-
   try {
     final List<Map<String, Object>> pipeline = [];
     final watch = collection.watch(pipeline);
 
-    watch.listen((status) {
-      if (status.isUpdate || status.isInsert || status.isDelete) {
+    watch.listen((status) async {
+      final updateData = await collection.find().toList();
+      final List<Map> list = [];
+
+      for (var data in updateData) {
+        list.add(
+          {
+            "key": data.keys.firstWhere(
+              (key) => key != "_id",
+            ),
+            "id": data['_id'].toHexString(),
+          },
+        );
+      }
+      if (status.isUpdate) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": list,
+            },
+          ),
+        );
+      }
+      if (status.isInsert) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": list,
+            },
+          ),
+        );
+      }
+      if (status.isDelete) {
         socket.sink.add(
           json.encode(
             {

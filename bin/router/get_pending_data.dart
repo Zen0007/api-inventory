@@ -19,13 +19,34 @@ Future<void> getDataPending({
     final List<Map<String, Object>> pipeline = [];
     final watch = collection.watch(pipeline);
 
-    watch.listen((status) {
-      if (status.isUpdate || status.isInsert || status.isDelete) {
+    watch.listen((status) async {
+      final updateData = await collection.find().toList();
+      if (status.isUpdate) {
         socket.sink.add(
           json.encode(
             {
               endpoint: valueEdnpoint,
-              "message": data,
+              "message": updateData,
+            },
+          ),
+        );
+      }
+      if (status.isInsert) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": updateData,
+            },
+          ),
+        );
+      }
+      if (status.isDelete) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": updateData,
             },
           ),
         );

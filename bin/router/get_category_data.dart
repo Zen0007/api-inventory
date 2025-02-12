@@ -77,39 +77,59 @@ Future<void> getDataCategoryAvaileble({
     final List<Map<String, Object>> pipeline = [];
     final watch = collection.watch(pipeline);
 
-    // Filter the data using a for loop
-    List<Map<String, dynamic>> filteredData = [];
+    watch.listen((status) async {
+      final updateData = await collection.find().toList();
+      // Filter the data using a for loop
+      List<Map<String, dynamic>> filteredData = [];
 
-    for (var item in data) {
-      Map<String, dynamic> filteredItem = {};
+      for (var item in updateData) {
+        Map<String, dynamic> filteredItem = {};
 
-      item.forEach((key, value) {
-        if (key == '_id') {
-          filteredItem[key] = value;
-        } else if (value is Map) {
-          // temporary hold value index
-          Map<String, dynamic> filteredSubItem = {};
-          value.forEach(
-            (subKey, subValue) {
-              if (subValue['status'] == 'available') {
-                // if index item is available value item add to filteredItem
-                filteredSubItem[subKey] = subValue;
-              }
-            },
-          );
-          if (filteredSubItem.isNotEmpty) {
-            filteredItem[key] = filteredSubItem;
+        item.forEach((key, value) {
+          if (key == '_id') {
+            filteredItem[key] = value;
+          } else if (value is Map) {
+            // temporary hold value index
+            Map<String, dynamic> filteredSubItem = {};
+            value.forEach(
+              (subKey, subValue) {
+                if (subValue['status'] == 'available') {
+                  // if index item is available value item add to filteredItem
+                  filteredSubItem[subKey] = subValue;
+                }
+              },
+            );
+            if (filteredSubItem.isNotEmpty) {
+              filteredItem[key] = filteredSubItem;
+            }
           }
+        });
+
+        if (filteredItem.length > 1) {
+          filteredData.add(filteredItem);
         }
-      });
-
-      if (filteredItem.length > 1) {
-        filteredData.add(filteredItem);
       }
-    }
-
-    watch.listen((status) {
-      if (status.isInsert || status.isUpdate || status.isDelete) {
+      if (status.isUpdate) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": filteredData,
+            },
+          ),
+        );
+      }
+      if (status.isInsert) {
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": filteredData,
+            },
+          ),
+        );
+      }
+      if (status.isDelete) {
         socket.sink.add(
           json.encode(
             {
