@@ -107,7 +107,8 @@ Future<void> getDataCategoryAvaileble({
         filteredData.add(filteredItem);
       }
     }
-    await for (var status in watch) {
+
+    watch.listen((status) {
       if (status.isInsert || status.isUpdate || status.isDelete) {
         socket.sink.add(
           json.encode(
@@ -118,7 +119,7 @@ Future<void> getDataCategoryAvaileble({
           ),
         );
       }
-    }
+    });
   } catch (e, s) {
     print('$e get data availeble');
     print(s);

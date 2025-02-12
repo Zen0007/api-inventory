@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -11,7 +10,6 @@ Future<void> getDataAllCategory({
   required WebSocketChannel socket,
   required DbCollection collection,
 }) async {
-  int start1 = DateTime.now().millisecond;
   try {
     final data = await collection.find().toList();
     if (data.isEmpty) {
@@ -21,11 +19,7 @@ Future<void> getDataAllCategory({
     final List<Map<String, Object>> pipeline = [];
     final watch = collection.watch(pipeline);
 
-    await for (var status in watch) {
-      print("is delete ${status.isDelete}");
-      print("is insert ${status.isInsert}");
-      print("is update ${status.isUpdate}");
-      print("event change $status");
+    watch.listen((status) {
       if (status.isUpdate || status.isInsert || status.isDelete) {
         socket.sink.add(
           json.encode(
@@ -35,14 +29,8 @@ Future<void> getDataAllCategory({
             },
           ),
         );
-
-        int end1 = DateTime.now().millisecond;
-        int result1 = start1 - end1;
-        print(('${result1 * -1}  Listener databse all category'));
-
-        return;
       }
-    }
+    });
   } catch (e, s) {
     print(e);
     print(s);

@@ -20,7 +20,7 @@ Future<void> getDataGranted({
     final List<Map<String, Object>> pipeline = [];
     final watch = collection.watch(pipeline);
 
-    await for (var status in watch) {
+    watch.listen((status) {
       if (status.isUpdate || status.isInsert || status.isDelete) {
         socket.sink.add(
           json.encode(
@@ -31,7 +31,7 @@ Future<void> getDataGranted({
           ),
         );
       }
-    }
+    });
   } catch (e, s) {
     print(e);
     print(s);

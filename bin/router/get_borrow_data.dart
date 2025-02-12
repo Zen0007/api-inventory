@@ -19,32 +19,18 @@ Future<void> getDataBorrow({
     final pipeline = <Map<String, Object>>[];
     final watch = collection.watch(pipeline);
 
-    await for (var status in watch) {
+    watch.listen((status) {
       if (status.isUpdate || status.isInsert || status.isDelete) {
-        switch (data.isEmpty) {
-          case true:
-            socket.sink.add(
-              json.encode(
-                {
-                  endpoint: valueEdnpoint,
-                  "message": [],
-                },
-              ),
-            );
-            break;
-          default:
-            socket.sink.add(
-              json.encode(
-                {
-                  endpoint: valueEdnpoint,
-                  "message": data,
-                },
-              ),
-            );
-            break;
-        }
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": data,
+            },
+          ),
+        );
       }
-    }
+    });
   } catch (e, s) {
     print(e);
     print(s);
