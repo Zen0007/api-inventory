@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'dart:io';
 import 'dart:convert';
 import 'router/login.dart';
@@ -28,7 +29,9 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 final Set<WebSocketChannel> channel = {};
 
 void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
-  int start1 = DateTime.now().millisecond;
+  channel.add(socket);
+  dev.log("Active connections: ${channel.length}");
+  int start1 = DateTime.now().millisecondsSinceEpoch;
   final categoryColection = dataBase.collection('category');
   final authAdmin = dataBase.collection('authAdmin');
   final borrowing = dataBase.collection('borrowing');
@@ -37,7 +40,7 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
   final expiredToken = dataBase.collection('expiredToken');
   try {
     socket.stream.listen(
-      (event) {
+      (event) async {
         print("event handleWs $event");
         var data = json.decode(event);
         final endpoint = data['endpoint'];
@@ -45,42 +48,42 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
 
         switch (endpoint) {
           case "register":
-            addNewAdmin(
+            await addNewAdmin(
               payload: payload,
               socket: socket,
               authAdmin: authAdmin,
             );
             break;
           case "login":
-            login(
+            await login(
               collection: authAdmin,
               data: payload,
               socket: socket,
             );
             break;
           case "logout":
-            logout(
+            await logout(
               payload: payload,
               socket: socket,
               colection: expiredToken,
             );
             break;
           case "verifikasi":
-            verifikasiToken(
+            await verifikasiToken(
               colection: expiredToken,
               payload: payload,
               socket: socket,
             );
             break;
           case "newCollection":
-            addNewCollection(
+            await addNewCollection(
               socket: socket,
               payload: payload,
               collection: categoryColection,
             );
             break;
           case "newItem":
-            addItemToInventory(
+            await addItemToInventory(
               socket: socket,
               payload: payload,
               dataBase: dataBase,
@@ -88,35 +91,35 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             );
             break;
           case "deleteItem":
-            deleteItem(
+            await deleteItem(
               socket: socket,
               collection: categoryColection,
               payload: payload,
             );
             break;
           case "deleteCategory":
-            deleteCategory(
+            await deleteCategory(
               socket: socket,
               collection: categoryColection,
               payload: payload,
             );
             break;
           case 'deleteUserGratend':
-            deleteUserGratend(
+            await deleteUserGratend(
               socket: socket,
               collection: itemBack,
               payload: payload,
             );
             break;
           case "updateStatusItem":
-            updateStatusItem(
+            await updateStatusItem(
               socket: socket,
               collection: categoryColection,
               payload: payload,
             );
             break;
           case "borrowing":
-            borrowingItem(
+            await borrowingItem(
               socket: socket,
               dataBase: dataBase,
               collection: borrowing,
@@ -124,28 +127,28 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             );
             break;
           case "checkUserBorrow":
-            checkUserIsBorrow(
+            await checkUserIsBorrow(
               socket: socket,
               payload: payload,
               collection: borrowing,
             );
             break;
           case "hasBorrow":
-            userHasBorrow(
+            await userHasBorrow(
               socket: socket,
               payload: payload,
               collection: borrowing,
             );
             break;
           case "hasBorrowOnce":
-            userHasBorrowOnce(
+            await userHasBorrowOnce(
               socket: socket,
               payload: payload,
               collection: borrowing,
             );
             break;
           case "waitPermision":
-            waithPermitAdmin(
+            await waithPermitAdmin(
               socket: socket,
               payload: payload,
               borrowing: borrowing,
@@ -153,7 +156,7 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             );
             break;
           case "granted":
-            granted(
+            await granted(
               socket: socket,
               category: categoryColection,
               pending: pending,
@@ -164,73 +167,73 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             break;
 
           case "getDataBorrow":
-            getDataBorrow(
+            await getDataBorrow(
               socket: socket,
               collection: borrowing,
             );
             break;
           case "getDataBorrowOnce":
-            getDataBorrowOnce(
+            await getDataBorrowOnce(
               socket: socket,
               collection: borrowing,
             );
             break;
           case "getDataPending":
-            getDataPending(
+            await getDataPending(
               socket: socket,
               collection: pending,
             );
             break;
           case "getDataPendingOnce":
-            getDataPendingOnce(
+            await getDataPendingOnce(
               socket: socket,
               collection: pending,
             );
             break;
           case "getDataAllCollection":
-            getDataAllCategory(
+            await getDataAllCategory(
               socket: socket,
               collection: categoryColection,
             );
             break;
           case "getDataAllCollectionOnce":
-            getDataAllCategoryOnce(
+            await getDataAllCategoryOnce(
               socket: socket,
               collection: categoryColection,
             );
             break;
           case "getDataCollectionAvaileble":
-            getDataCategoryAvaileble(
+            await getDataCategoryAvaileble(
               socket: socket,
               collection: categoryColection,
             );
             break;
           case "getDataCollectionAvailebleOnce":
-            getDataCategoryAvailebleOnce(
+            await getDataCategoryAvailebleOnce(
               socket: socket,
               collection: categoryColection,
             );
             break;
           case "getDataGranted":
-            getDataGranted(
+            await getDataGranted(
               socket: socket,
               collection: itemBack,
             );
             break;
           case "getDataGrantedOnce":
-            getDataGrantedOnce(
+            await getDataGrantedOnce(
               socket: socket,
               collection: itemBack,
             );
             break;
           case "getAllKeyCategory":
-            getAllKeyCategory(
+            await getAllKeyCategory(
               collection: categoryColection,
               socket: socket,
             );
             break;
           case "getAllKeyCategoryOnce":
-            getDataAllKeyCategoryOnce(
+            await getDataAllKeyCategoryOnce(
               socket: socket,
               collection: categoryColection,
             );
@@ -244,22 +247,24 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             ));
         }
 
-        int end1 = DateTime.now().millisecond;
+        int end1 = DateTime.now().millisecondsSinceEpoch;
         int result1 = start1 - end1;
-        print(('${result1 * -1} execution code time handelWs'));
+        print(('$result1 execution code time handelWs'));
       },
       onDone: () {
         channel.remove(socket);
-        print("is close");
+        dev.log("Done Connection");
       },
       onError: (e) {
         channel.remove(socket);
-        print('on error $e');
+        dev.log("Active connections on error $e");
         socket.sink.close();
       },
+      cancelOnError: true,
     );
   } catch (e, s) {
-    print("error in handelws $e");
+    dev.log("Connections Is : $e");
+    dev.log("Connections Is : $s");
     print(s);
   }
 }
@@ -278,7 +283,6 @@ void main(List<String> args) async {
         final socket = await WebSocketTransformer.upgrade(request);
         final chanel = IOWebSocketChannel(socket);
 
-        channel.add(chanel);
         handleWebSocket(chanel, dataBase);
       } else {
         request.response

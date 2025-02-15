@@ -16,7 +16,7 @@ Future<void> addNewAdmin({
     final passowrd = payload['password'];
 
     // for recode who add new admin
-    final nameAdminAdd = payload['nameAdd'];
+    final String? nameAdminAdd = payload['nameAdd'];
 
     if (nameNewAdmin == null || passowrd == null) {
       socket.sink.add(json.encode({
@@ -40,7 +40,7 @@ Future<void> addNewAdmin({
       nameNewAdmin: {
         "name": nameNewAdmin,
         "password": passowrd,
-        "addBy": nameAdminAdd,
+        "addBy": nameAdminAdd ?? "super admin",
       }
     });
 
