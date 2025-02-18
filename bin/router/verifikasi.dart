@@ -29,11 +29,34 @@ Future<void> verifikasiToken({
         "xr@7(@+mrO)QjA1E_5xXe1@DqC5&VhuhY@*)E)tsUTn5G)USsv^JUGa\$9hSne9RB";
 
     JWT.verify(status, SecretKey(secretKey));
-    socket.sink
-        .add(json.encode({"endpoint": "VERIFIKASI", "status": "VERIFIKASI"}));
-  } on JWTUndefinedException catch (e) {
+    socket.sink.add(
+      json.encode(
+        {
+          "endpoint": "VERIFIKASI",
+          "status": "VERIFIKASI",
+        },
+      ),
+    );
+  } on JWTExpiredException catch (e, s) {
+    socket.sink.add(
+      json.encode(
+        {
+          "endpoint": "VERIFIKASI",
+          "status": "NOT-VERIFIKASI",
+        },
+      ),
+    );
     print(e);
-  } catch (e, s) {
+    print(s);
+  } on JWTException catch (e, s) {
+    socket.sink.add(
+      json.encode(
+        {
+          "endpoint": "VERIFIKASI",
+          "status": "NOT-VERIFIKASI",
+        },
+      ),
+    );
     print(e);
     print(s);
   }

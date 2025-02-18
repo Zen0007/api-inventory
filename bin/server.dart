@@ -261,22 +261,28 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
 void main(List<String> args) async {
   try {
     final int port = 8080;
-    final server = await HttpServer.bind('127.0.0.1', port);
-    print('webSocker listening on ws:/$server');
+    final server = await HttpServer.bind("127.0.0.1", port);
+    print('webSocker listening on ws:/${server.port}');
     print("port ${server.address}");
 
     final Db dataBase = Db('mongodb://localhost:27017/inventory');
     await dataBase.open();
     await for (HttpRequest request in server) {
-      if (request.uri.path == '/ws') {
-        final socket = await WebSocketTransformer.upgrade(request);
-        final chanel = IOWebSocketChannel(socket);
+      try {
+        if (request.uri.path == '/ws') {
+          final socket = await WebSocketTransformer.upgrade(request);
+          final chanel = IOWebSocketChannel(socket);
+          print(chanel.stream);
 
-        handleWebSocket(chanel, dataBase);
-      } else {
-        request.response
-          ..statusCode = HttpStatus.forbidden
-          ..close();
+          handleWebSocket(chanel, dataBase);
+        } else {
+          request.response
+            ..statusCode = HttpStatus.forbidden
+            ..close();
+        }
+      } catch (e, s) {
+        print(e);
+        print(s);
       }
     }
 

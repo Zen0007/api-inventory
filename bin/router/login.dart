@@ -53,8 +53,8 @@ Future<void> login({
 
     final payload = {
       "username": userName,
-      'exp':
-          DateTime.now().add(Duration(days: 30)).millisecondsSinceEpoch ~/ 1000,
+      'exp': DateTime.now().add(Duration(minutes: 1)).millisecondsSinceEpoch ~/
+          1000,
     };
 
     const String secretKey =
