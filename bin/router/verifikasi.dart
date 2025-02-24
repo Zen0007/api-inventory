@@ -37,7 +37,7 @@ Future<void> verifikasiToken({
         },
       ),
     );
-  } on JWTExpiredException catch (e, s) {
+  } on JWTExpiredException catch (e, _) {
     socket.sink.add(
       json.encode(
         {
@@ -46,9 +46,8 @@ Future<void> verifikasiToken({
         },
       ),
     );
-    print(e);
-    print(s);
-  } on JWTException catch (e, s) {
+    print("JWT IS EXPIRED");
+  } on JWTException catch (e, _) {
     socket.sink.add(
       json.encode(
         {
@@ -57,7 +56,7 @@ Future<void> verifikasiToken({
         },
       ),
     );
-    print(e);
-    print(s);
+
+    print("JWT IS EXCEPTION");
   }
 }

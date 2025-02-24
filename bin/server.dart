@@ -30,7 +30,7 @@ final Set<WebSocketChannel> channel = {};
 
 void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
   channel.add(socket);
-  dev.log("Active connections: ${channel.length}");
+
   int start1 = DateTime.now().millisecondsSinceEpoch;
   final categoryColection = dataBase.collection('category');
   final authAdmin = dataBase.collection('authAdmin');
@@ -39,223 +39,234 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
   final pending = dataBase.collection('pendingReturn');
   final expiredToken = dataBase.collection('expiredToken');
 
-  await for (final event in socket.stream) {
-    try {
-      print("event handleWs $event");
-      var data = json.decode(event);
-      final endpoint = data['endpoint'];
-      final payload = data['data'];
+  channel.last.stream.listen(
+    (event) async {
+      try {
+        var data = json.decode(event);
+        print("event handleWs ${data['endpoint']}");
+        final endpoint = data['endpoint'];
+        final payload = data['data'];
 
-      switch (endpoint) {
-        case "register":
-          await addNewAdmin(
-            payload: payload,
-            socket: socket,
-            authAdmin: authAdmin,
-          );
-          break;
-        case "login":
-          await login(
-            collection: authAdmin,
-            data: payload,
-            socket: socket,
-          );
-          break;
-        case "logout":
-          await logout(
-            payload: payload,
-            socket: socket,
-            colection: expiredToken,
-          );
-          break;
-        case "verifikasi":
-          await verifikasiToken(
-            colection: expiredToken,
-            payload: payload,
-            socket: socket,
-          );
-          break;
-        case "newCollection":
-          await addNewCollection(
-            socket: socket,
-            payload: payload,
-            collection: categoryColection,
-          );
-          break;
-        case "newItem":
-          await addItemToInventory(
-            socket: socket,
-            payload: payload,
-            dataBase: dataBase,
-            collection: categoryColection,
-          );
-          break;
-        case "deleteItem":
-          await deleteItem(
-            socket: socket,
-            collection: categoryColection,
-            payload: payload,
-          );
-          break;
-        case "deleteCategory":
-          await deleteCategory(
-            socket: socket,
-            collection: categoryColection,
-            payload: payload,
-          );
-          break;
-        case 'deleteUserGratend':
-          await deleteUserGratend(
-            socket: socket,
-            collection: itemBack,
-            payload: payload,
-          );
-          break;
-        case "updateStatusItem":
-          await updateStatusItem(
-            socket: socket,
-            collection: categoryColection,
-            payload: payload,
-          );
-          break;
-        case "borrowing":
-          await borrowingItem(
-            socket: socket,
-            dataBase: dataBase,
-            collection: borrowing,
-            payload: payload,
-          );
-          break;
-        case "checkUserBorrow":
-          await checkUserIsBorrow(
-            socket: socket,
-            payload: payload,
-            collection: borrowing,
-          );
-          break;
-        case "hasBorrow":
-          await userHasBorrow(
-            socket: socket,
-            payload: payload,
-            collection: borrowing,
-          );
-          break;
-        case "hasBorrowOnce":
-          await userHasBorrowOnce(
-            socket: socket,
-            payload: payload,
-            collection: borrowing,
-          );
-          break;
-        case "waitPermision":
-          await waithPermitAdmin(
-            socket: socket,
-            payload: payload,
-            borrowing: borrowing,
-            pending: pending,
-          );
-          break;
-        case "granted":
-          await granted(
-            socket: socket,
-            category: categoryColection,
-            pending: pending,
-            borrow: borrowing,
-            itemBack: itemBack,
-            payload: payload,
-          );
-          break;
+        switch (endpoint) {
+          case "register":
+            await addNewAdmin(
+              payload: payload,
+              socket: socket,
+              authAdmin: authAdmin,
+            );
+            break;
+          case "login":
+            await login(
+              collection: authAdmin,
+              data: payload,
+              socket: socket,
+            );
+            break;
+          case "logout":
+            await logout(
+              payload: payload,
+              socket: socket,
+              colection: expiredToken,
+            );
+            break;
+          case "verifikasi":
+            await verifikasiToken(
+              colection: expiredToken,
+              payload: payload,
+              socket: socket,
+            );
+            break;
+          case "newCollection":
+            await addNewCollection(
+              socket: socket,
+              payload: payload,
+              collection: categoryColection,
+            );
+            break;
+          case "newItem":
+            await addItemToInventory(
+              socket: socket,
+              payload: payload,
+              dataBase: dataBase,
+              collection: categoryColection,
+            );
+            break;
+          case "deleteItem":
+            await deleteItem(
+              socket: socket,
+              collection: categoryColection,
+              payload: payload,
+            );
+            break;
+          case "deleteCategory":
+            await deleteCategory(
+              socket: socket,
+              collection: categoryColection,
+              payload: payload,
+            );
+            break;
+          case 'deleteUserGratend':
+            await deleteUserGratend(
+              socket: socket,
+              collection: itemBack,
+              payload: payload,
+            );
+            break;
+          case "updateStatusItem":
+            await updateStatusItem(
+              socket: socket,
+              collection: categoryColection,
+              payload: payload,
+            );
+            break;
+          case "borrowing":
+            await borrowingItem(
+              socket: socket,
+              dataBase: dataBase,
+              collection: borrowing,
+              payload: payload,
+            );
+            break;
+          case "checkUserBorrow":
+            await checkUserIsBorrow(
+              socket: socket,
+              payload: payload,
+              collection: borrowing,
+            );
+            break;
+          case "hasBorrow":
+            await userHasBorrow(
+              socket: socket,
+              payload: payload,
+              collection: borrowing,
+            );
+            break;
+          case "hasBorrowOnce":
+            await userHasBorrowOnce(
+              socket: socket,
+              payload: payload,
+              collection: borrowing,
+            );
+            break;
+          case "waitPermision":
+            await waithPermitAdmin(
+              socket: socket,
+              payload: payload,
+              borrowing: borrowing,
+              pending: pending,
+            );
+            break;
+          case "granted":
+            await granted(
+              socket: socket,
+              category: categoryColection,
+              pending: pending,
+              borrow: borrowing,
+              itemBack: itemBack,
+              payload: payload,
+            );
+            break;
 
-        case "getDataBorrow":
-          await getDataBorrow(
-            socket: socket,
-            collection: borrowing,
-          );
-          break;
-        case "getDataBorrowOnce":
-          await getDataBorrowOnce(
-            socket: socket,
-            collection: borrowing,
-          );
-          break;
-        case "getDataPending":
-          await getDataPending(
-            socket: socket,
-            collection: pending,
-          );
-          break;
-        case "getDataPendingOnce":
-          await getDataPendingOnce(
-            socket: socket,
-            collection: pending,
-          );
-          break;
-        case "getDataAllCollection":
-          await getDataAllCategory(
-            socket: socket,
-            collection: categoryColection,
-          );
-          break;
-        case "getDataAllCollectionOnce":
-          await getDataAllCategoryOnce(
-            socket: socket,
-            collection: categoryColection,
-          );
-          break;
-        case "getDataCollectionAvaileble":
-          await getDataCategoryAvaileble(
-            socket: socket,
-            collection: categoryColection,
-          );
-          break;
-        case "getDataCollectionAvailebleOnce":
-          await getDataCategoryAvailebleOnce(
-            socket: socket,
-            collection: categoryColection,
-          );
-          break;
-        case "getDataGranted":
-          await getDataGranted(
-            socket: socket,
-            collection: itemBack,
-          );
-          break;
-        case "getDataGrantedOnce":
-          await getDataGrantedOnce(
-            socket: socket,
-            collection: itemBack,
-          );
-          break;
-        case "getAllKeyCategory":
-          await getAllKeyCategory(
-            collection: categoryColection,
-            socket: socket,
-          );
-          break;
-        case "getAllKeyCategoryOnce":
-          await getDataAllKeyCategoryOnce(
-            socket: socket,
-            collection: categoryColection,
-          );
-          break;
-        default:
-          socket.sink.add(json.encode(
-            {
-              "endpoint": "ERROR",
-              "error": "endpoint not found",
-            },
-          ));
+          case "getDataBorrow":
+            await getDataBorrow(
+              socket: socket,
+              collection: borrowing,
+            );
+            break;
+          case "getDataBorrowOnce":
+            await getDataBorrowOnce(
+              socket: socket,
+              collection: borrowing,
+            );
+            break;
+          case "getDataPending":
+            await getDataPending(
+              socket: socket,
+              collection: pending,
+            );
+            break;
+          case "getDataPendingOnce":
+            await getDataPendingOnce(
+              socket: socket,
+              collection: pending,
+            );
+            break;
+          case "getDataAllCollection":
+            await getDataAllCategory(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          case "getDataAllCollectionOnce":
+            await getDataAllCategoryOnce(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          case "getDataCollectionAvaileble":
+            await getDataCategoryAvaileble(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          case "getDataCollectionAvailebleOnce":
+            await getDataCategoryAvailebleOnce(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          case "getDataGranted":
+            await getDataGranted(
+              socket: socket,
+              collection: itemBack,
+            );
+            break;
+          case "getDataGrantedOnce":
+            await getDataGrantedOnce(
+              socket: socket,
+              collection: itemBack,
+            );
+            break;
+          case "getAllKeyCategory":
+            await getAllKeyCategory(
+              collection: categoryColection,
+              socket: socket,
+            );
+            break;
+          case "getAllKeyCategoryOnce":
+            await getDataAllKeyCategoryOnce(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          default:
+            socket.sink.add(json.encode(
+              {
+                "endpoint": "ERROR",
+                "error": "endpoint not found",
+              },
+            ));
+        }
+
+        int end1 = DateTime.now().millisecondsSinceEpoch;
+        int result1 = start1 - end1;
+        print(('$result1 execution code time handelWs'));
+        dev.log("Active connections: ${channel.length}");
+      } catch (e, s) {
+        dev.log("Connections Is : $e");
+        dev.log("Connections Is : $s");
+        print(s);
       }
-
-      int end1 = DateTime.now().millisecondsSinceEpoch;
-      int result1 = start1 - end1;
-      print(('$result1 execution code time handelWs'));
-    } catch (e, s) {
-      dev.log("Connections Is : $e");
-      dev.log("Connections Is : $s");
-      print(s);
-    }
-  }
+    },
+    onDone: () {
+      dev.log("client close");
+      channel.clear();
+    },
+    onError: (e) {
+      dev.log("on error $e");
+      channel.clear();
+    },
+  );
 }
 
 void main(List<String> args) async {
@@ -272,7 +283,6 @@ void main(List<String> args) async {
         if (request.uri.path == '/ws') {
           final socket = await WebSocketTransformer.upgrade(request);
           final chanel = IOWebSocketChannel(socket);
-          print(chanel.stream);
 
           handleWebSocket(chanel, dataBase);
         } else {
