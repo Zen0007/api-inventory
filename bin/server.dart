@@ -28,6 +28,9 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 final Set<WebSocketChannel> channel = {};
 
 void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
+  await dataBase.open();
+  channel.add(socket);
+
   int start1 = DateTime.now().millisecond;
   final categoryColection = dataBase.collection('category');
   final authAdmin = dataBase.collection('authAdmin');
@@ -36,7 +39,7 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
   final pending = dataBase.collection('pendingReturn');
   final expiredToken = dataBase.collection('expiredToken');
   try {
-    socket.stream.listen(
+    channel.last.stream.listen(
       (event) {
         print("event handleWs $event");
         var data = json.decode(event);
@@ -251,11 +254,14 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
       onDone: () {
         channel.remove(socket);
         print("is close");
+        dataBase.close();
+        socket.sink.close();
       },
       onError: (e) {
         channel.remove(socket);
         print('on error $e');
         socket.sink.close();
+        dataBase.close();
       },
     );
   } catch (e, s) {
@@ -272,7 +278,7 @@ void main(List<String> args) async {
     print("port ${server.address}");
 
     final Db dataBase = Db('mongodb://localhost:27017/inventory');
-    await dataBase.open();
+
     await for (HttpRequest request in server) {
       if (request.uri.path == '/ws') {
         final socket = await WebSocketTransformer.upgrade(request);
