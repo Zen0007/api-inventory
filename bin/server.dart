@@ -29,6 +29,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 final Set<WebSocketChannel> channel = {};
 
 void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
+  await dataBase.open();
   channel.add(socket);
 
   int start1 = DateTime.now().millisecondsSinceEpoch;
@@ -261,10 +262,12 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
     onDone: () {
       dev.log("client close");
       channel.clear();
+      dataBase.close();
     },
     onError: (e) {
       dev.log("on error $e");
       channel.clear();
+      dataBase.close();
     },
   );
 }
@@ -277,7 +280,6 @@ void main(List<String> args) async {
     print("port ${server.address}");
 
     final Db dataBase = Db('mongodb://localhost:27017/inventory');
-    await dataBase.open();
     await for (HttpRequest request in server) {
       try {
         if (request.uri.path == '/ws') {

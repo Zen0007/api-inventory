@@ -13,8 +13,8 @@ Future<void> login({
   required DbCollection collection,
 }) async {
   try {
-    final userName = data['name'];
-    final password = data['password'];
+    final String? userName = data['name'];
+    final String? password = data['password'];
 
     if (userName == null || password == null) {
       socket.sink.add(json.encode(
@@ -25,6 +25,7 @@ Future<void> login({
       ));
       return;
     }
+
     final findUser = await collection.findOne(where.exists(userName));
 
     if (findUser == null) {
