@@ -62,7 +62,7 @@ Future<void> deleteItem({
         json.encode(
           {
             endpoint: valueEdnpoint,
-            "message": "success to delete item",
+            "message": "success to delete item $indexItem",
           },
         ),
       );

@@ -17,7 +17,7 @@ Future<void> updateStatusItem({
     final indexItem = payload['index'];
 
     final findIndex = await collection.findOne(where.exists(nameCategory));
-    print(findIndex);
+
     if (findIndex![nameCategory][indexItem] == null) {
       return socket.sink.add(
         json.encode(
