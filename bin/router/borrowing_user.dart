@@ -100,11 +100,5 @@ Future<void> borrowingItem({
   } catch (e, s) {
     print(e);
     print(s);
-    socket.sink.add(json.encode(
-      {
-        endpoint: valueEndpoint,
-        "warning": {"error": "$e", "StackTrace": "$s"},
-      },
-    ));
   }
 }

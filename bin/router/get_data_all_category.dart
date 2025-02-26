@@ -18,8 +18,11 @@ Future<void> getDataAllCategory({
 
     final List<Map<String, Object>> pipeline = [];
     final watch = collection.watch(pipeline);
-
+    print("send data");
     watch.listen((status) async {
+      print("status delete \t  ${status.isDelete}");
+      print("status update \t  ${status.isUpdate}");
+      print("status insert \t  ${status.isInsert}");
       final updateData = await collection.find().toList();
 
       if (status.isUpdate) {
