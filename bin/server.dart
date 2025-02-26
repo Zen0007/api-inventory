@@ -43,11 +43,11 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
   channel.last.stream.listen(
     (event) async {
       try {
-        var data = json.decode(event);
-        print("event handleWs ${data['endpoint']}");
+        final data = json.decode(event);
         final endpoint = data['endpoint'];
         final payload = data['data'];
 
+        print("         \t $endpoint");
         switch (endpoint) {
           case "register":
             await addNewAdmin(
@@ -88,7 +88,6 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             await addItemToInventory(
               socket: socket,
               payload: payload,
-              dataBase: dataBase,
               collection: categoryColection,
             );
             break;
@@ -193,7 +192,7 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             );
             break;
           case "getDataAllCollection":
-            await getDataAllCategory(
+            getDataAllCategory(
               socket: socket,
               collection: categoryColection,
             );
