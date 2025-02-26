@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'get_data_all_category.dart';
 
 const String endpoint = 'endpoint';
 const String warning = 'warning';
@@ -10,7 +11,6 @@ const String valueEdnpoint = "NEWITEM";
 Future<void> addItemToInventory({
   required WebSocketChannel socket,
   dynamic payload,
-  required Db dataBase,
   required DbCollection collection,
 }) async {
   int start1 = DateTime.now().millisecond;
@@ -75,7 +75,6 @@ Future<void> addItemToInventory({
     );
 
     if (updateCollection.isSuccess) {
-      print('Document updated successfully');
       socket.sink.add(
         json.encode(
           {
