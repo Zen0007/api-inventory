@@ -60,7 +60,7 @@ Future<void> granted({
     */
     for (var status in itemsUpdateStatus) {
       final categoryName = status['category'];
-      final index = status['id'];
+      final index = status['index'];
 
       //    this code to get data in collection category
       final categoryItem = await category.findOne(where.exists(categoryName));
@@ -68,11 +68,10 @@ Future<void> granted({
       if (categoryItem != null) {
         // update status items in collection category
         await category.updateOne(
-          where.id(categoryItem["_id"]),
-          modify.set(
-            "$categoryName.$index.status",
-            "available",
-          ),
+          where
+              .id(categoryItem["_id"])
+              .eq("$categoryName.$index", {"\$exists": true}),
+          modify.set("$categoryName.$index.status", "available"),
         );
       }
     }
