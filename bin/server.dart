@@ -1,484 +1,305 @@
-import 'dart:convert';
+import 'dart:developer' as dev;
 import 'dart:io';
-import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart';
-import 'package:shelf_router/shelf_router.dart';
-import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
-//import 'package:mongo_dart/mongo_dart.dart';
+import 'dart:convert';
+import 'router/login.dart';
+import 'router/logout.dart';
+import 'router/granted.dart';
+import 'router/register.dart';
+import 'router/verifikasi.dart';
+import 'router/add_new_item.dart';
+import 'router/delete_item.dart';
+import 'router/delete_category.dart';
+import 'router/delete_gratend_user.dart';
+import 'router/update_status.dart';
+import 'router/borrowing_user.dart';
+import 'router/wait_permision.dart';
+import 'router/get_user_granted.dart';
+import 'router/get_borrow_data.dart';
+import 'router/get_pending_data.dart';
+import 'router/get_key_collection.dart';
+import 'router/get_category_data.dart';
+import 'router/add_new_collection.dart';
+import 'router/chek_user_has_borrow.dart';
+import 'router/get_data_all_category.dart';
+import 'router/user_has_borrow.dart';
+import 'package:mongo_dart/mongo_dart.dart';
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
-// final String url = 'mongodb://localhost:27017/inventory';
+final Set<WebSocketChannel> channel = {};
 
-// final dataBase = Db(url);
-// final itemColection = dataBase.collection('category');
-// final authAdmin = dataBase.collection('auth');
+void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
+  await dataBase.open();
+  channel.add(socket);
 
-final Map<String, dynamic> db = {
-  "auth": {
-    "asta": {
-      "name": "asta",
-      "password": "asta1234",
-    },
-    "yuno": {
-      "name": "yuno",
-      "password": "yuno1234^",
-    }
-  },
-  'category': {
-    "mikrotick": {
-      "1": {
-        "name": "cisco",
-        "label": "no 2",
-        "image": "-",
-        "status": "availeble"
-      }
-    },
-    "accesPoint": {
-      "1": {
-        "label": "no 123",
-        "nameItem": "tp Link",
-        "image": "-",
-        "status": "availeble"
-      },
-      "2": {
-        "label": "no 334",
-        "nameItem": "tp Link",
-        "image": "-",
-        "status": "availeble"
-      }
-    }
-  },
-  "borrowing": {},
-  "pending": {},
-  "itemBack": {},
-};
+  int start1 = DateTime.now().millisecondsSinceEpoch;
+  final categoryColection = dataBase.collection('category');
+  final authAdmin = dataBase.collection('authAdmin');
+  final borrowing = dataBase.collection('borrowing');
+  final itemBack = dataBase.collection('returnItem');
+  final pending = dataBase.collection('pendingReturn');
+  final expiredToken = dataBase.collection('expiredToken');
 
-const String secretKey =
-    "xr@7(@+mrO)QjA1E_5xXe1@DqC5&VhuhY@*)E)tsUTn5G)USsv^JUGa\$9hSne9RB";
+  channel.last.stream.listen(
+    (event) async {
+      try {
+        final data = json.decode(event);
+        final endpoint = data['endpoint'];
+        final payload = data['data'];
 
-// Configure routes.
-final _router = Router()
-  ..post("/addNewAdmin", addNewAdmin)
-  ..post("/login", login)
-  ..post("/verifikasi", verifikasiToken)
-  ..post("/addNewCategory", addItemToInventory)
-  ..post("/addNewCollection", addNewCollection)
-  ..post("/borrowingItem", borrowingItem)
-  ..post("/pending", waithPermitAdmin)
-  ..post("/granted", granted)
-  ..post("/checkUserIsBorrow", checkUserIsBorrow)
-  ..post("/updateStatus", updateStatusItem)
-  ..delete("/deleteItem", deleteItem)
-  ..delete("/deleteUserPriod", deleteBorrowingUser);
+        print("         \t $endpoint");
+        switch (endpoint) {
+          case "register":
+            await addNewAdmin(
+              payload: payload,
+              socket: socket,
+              authAdmin: authAdmin,
+            );
+            break;
+          case "login":
+            await login(
+              collection: authAdmin,
+              data: payload,
+              socket: socket,
+            );
+            break;
+          case "logout":
+            await logout(
+              payload: payload,
+              socket: socket,
+              colection: expiredToken,
+            );
+            break;
+          case "verifikasi":
+            await verifikasiToken(
+              colection: expiredToken,
+              payload: payload,
+              socket: socket,
+            );
+            break;
+          case "newCollection":
+            await addNewCollection(
+              socket: socket,
+              payload: payload,
+              collection: categoryColection,
+            );
+            break;
+          case "newItem":
+            await addItemToInventory(
+              socket: socket,
+              payload: payload,
+              collection: categoryColection,
+            );
+            break;
+          case "deleteItem":
+            await deleteItem(
+              socket: socket,
+              collection: categoryColection,
+              payload: payload,
+            );
+            break;
+          case "deleteCategory":
+            await deleteCategory(
+              socket: socket,
+              collection: categoryColection,
+              payload: payload,
+            );
+            break;
+          case 'deleteUserGratend':
+            await deleteUserGratend(
+              socket: socket,
+              collection: itemBack,
+              payload: payload,
+            );
+            break;
+          case "updateStatusItem":
+            await updateStatusItem(
+              socket: socket,
+              collection: categoryColection,
+              payload: payload,
+            );
+            break;
+          case "borrowing":
+            await borrowingItem(
+              socket: socket,
+              dataBase: dataBase,
+              collection: borrowing,
+              payload: payload,
+            );
+            break;
+          case "checkUserBorrow":
+            await checkUserIsBorrow(
+              socket: socket,
+              payload: payload,
+              collection: borrowing,
+            );
+            break;
+          case "hasBorrow":
+            await userHasBorrow(
+              socket: socket,
+              payload: payload,
+              collection: borrowing,
+            );
+            break;
+          case "hasBorrowOnce":
+            await userHasBorrowOnce(
+              socket: socket,
+              payload: payload,
+              collection: borrowing,
+            );
+            break;
+          case "waitPermision":
+            await waithPermitAdmin(
+              socket: socket,
+              payload: payload,
+              borrowing: borrowing,
+              pending: pending,
+            );
+            break;
+          case "granted":
+            await granted(
+              socket: socket,
+              category: categoryColection,
+              pending: pending,
+              borrow: borrowing,
+              itemBack: itemBack,
+              payload: payload,
+            );
+            break;
 
-Future<Response> addNewAdmin(Request req) async {
-  try {
-    final request = await req.readAsString();
-    final data = json.decode(request);
-    if (!data.containsKey('name') || !data.containsKey('password')) {
-      return Response(404,
-          body: json.encode(
-            {
-              "message": "missing field",
-            },
-          ));
-    }
-    final nameNewAdmin = data['name'];
-    final passowrd = data['password'];
-
-    db['auth'] = {
-      nameNewAdmin: {
-        "name": nameNewAdmin,
-        "password": passowrd,
-      },
-    };
-    print(db['auth']);
-    return Response(200,
-        body: json.encode({"message": "success add new admin"}));
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(500,
-        body: json.encode({"message": "internal server error"}));
-  }
-}
-
-Future<Response> login(Request req) async {
-  try {
-    final request = await req.readAsString();
-    final data = json.decode(request);
-    if (!data.containsKey('name') || !data.containsKey('password')) {
-      return Response(404,
-          body: json.encode({"message": "name admin not found "}));
-    }
-
-    final userName = data['name'];
-    final password = data['password'];
-
-    if (!db['auth'].containsKey(userName)) {
-      return Response(404,
-          body: json.encode({"message": "user not exists in databse"}));
-    }
-    if (db['auth'][userName]['name'] != userName ||
-        db['auth'][userName]['password'] != password) {
-      return Response(404, body: json.encode({"message": "user name invalid"}));
-    }
-
-    final payload = {
-      "username": userName,
-      'exp':
-          DateTime.now().add(Duration(days: 30)).millisecondsSinceEpoch ~/ 1000,
-    };
-
-    final jwt = JWT(payload);
-    final token = jwt.sign(SecretKey(secretKey));
-
-    return Response(200,
-        body: json.encode(
-          {
-            "token": token,
-          },
-        ));
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(500,
-        body: json.encode({"message": "internal server error"}));
-  }
-}
-
-Future<Response> verifikasiToken(Request req) async {
-  try {
-    final request = await req.readAsString();
-    final data = json.decode(request);
-
-    if (!data.containsKey('status')) {
-      return Response(200, body: json.encode({"status": "NOT-VERIFIKASI"}));
-    }
-
-    final status = data['status'];
-    if (status == null) {
-      return Response(200, body: json.encode({"status": "NOT-VERIFIKASI"}));
-    }
-
-    JWT.verify(status, SecretKey(secretKey));
-    return Response(200, body: json.encode({"status": "VERIFIKASI"}));
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(200, body: json.encode({"status": "NOT-VERIFIKASI"}));
-  }
-}
-
-Future<Response> logout(Request req) async {
-  try {
-    return Response(200, body: json.encode({"message": "succes delete user "}));
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(500,
-        body: json.encode({"message": "internal server error"}));
-  }
-}
-
-Future<Response> deleteBorrowingUser(Request req) async {
-  try {
-    return Response(200,
-        body: json.encode({"message": "success delete user "}));
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(500,
-        body: json.encode({"message": "internal server error"}));
-  }
-}
-
-Future<Response> deleteItem(Request req) async {
-  try {
-    final request = await req.readAsString();
-    final data = json.decode(request);
-
-    final nameCategory = data['category'];
-    final item = data['item'];
-
-    db['category'][nameCategory].remove(item);
-    return Response(200,
-        body: json.encode({"message": "success to delete item"}));
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(500,
-        body: json.encode({"message": "internal server error"}));
-  }
-}
-
-Future<Response> updateStatusItem(Request req) async {
-  try {
-    final request = await req.readAsString();
-    final data = json.decode(request);
-
-    final category = data['category'];
-    final indexItem = data['index'];
-    final newStatus = data['status'];
-
-    db['category'][category][indexItem]['status'] = newStatus;
-
-    print(db['category']);
-    return Response(200,
-        body: json.encode(
-          {
-            "message": "success update status",
-          },
-        ));
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(500,
-        body: json.encode({"message": "internal server error"}));
-  }
-}
-
-Future<Response> addNewCollection(Request req) async {
-  try {
-    final request = await req.readAsString();
-    final data = json.decode(request);
-
-    final newCollection = data['category'];
-
-    if (!data.containsKey('category')) {
-      return Response(404,
-          body: json.encode(
-            {"message": "missing some field"},
-          ));
-    }
-
-    if (db['category'].containsKey(newCollection)) {
-      return Response(404,
-          body: json.encode(
-            {"message": "new category already exists"},
-          ));
-    }
-
-    db['category'][newCollection] = {};
-    print(db['category']);
-    return Response(200,
-        body: json.encode({"message": "success to add new category"}));
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(500,
-        body: json.encode({"message": "internal server error"}));
-  }
-}
-
-Future<Response> addItemToInventory(Request req) async {
-  try {
-    final request = await req.readAsString();
-    final data = json.decode(request);
-    if (!data.containsKey("category") ||
-        !data.containsKey("name") ||
-        !data.containsKey("label")) {
-      return Response(400,
-          body: json.encode({"message": "missing some field"}));
-    }
-    final nameCategory = data['category'];
-    final nameItem = data['name'];
-    final label = data['label'];
-    final image = data['image'];
-
-    if (!db['category'].containsKey(nameCategory)) {
-      print("the category is not exists ");
-      return Response(404,
-          body: json.encode({"message": "category is not found"}));
-    }
-
-    final List lastIndex =
-        db['category'][nameCategory].keys.map((key) => int.parse(key)).toList();
-    // Menghitung key terakhir jika sudah ada data
-    int lastKey =
-        lastIndex.isEmpty ? 0 : lastIndex.reduce((a, b) => a > b ? a : b);
-
-    // Menentukan key baru yang increment
-    String newKey = "${lastKey + 1}";
-
-    // Menambahkan item baru dengan key increment
-    db['category'][nameCategory]![newKey] = {
-      'name': nameItem,
-      'Label': label,
-      "status": "available",
-      'image': image ?? "-",
-    };
-    print(db['category']);
-    return Response(200,
-        body: json.encode({"message": "success to add item to inventory"}));
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(500,
-        body: json.encode({"message": "internal server error"}));
-  }
-}
-
-Future<Response> borrowingItem(Request req) async {
-  try {
-    final request = await req.readAsString();
-    final data = json.decode(request);
-
-    final nameUser = data['name'];
-    final classUser = data['class'];
-    final nisnUser = data['nisn'];
-    final nameTeacher = data['teacher'];
-    final indexItem = data['item'];
-    final collection = data['collection'];
-    final imageSelfie = data['imageSelfie'];
-    final imageNisn = data['imageNisn'];
-    if (!data.containsKey('name') ||
-        !data.containsKey('class') ||
-        !data.containsKey('nisn') ||
-        !data.containsKey('teacher') ||
-        !data.containsKey('imageSelfie') ||
-        !data.containsKey('imageNisn')) {
-      return Response(404,
-          body: json.encode({"message": "missing some field"}));
-    }
-
-    if (db['borrowing'].containsKey(nameUser)) {
-      return Response(404,
-          body: json.encode(
-            {
-              "message": "still borrow item pleas return item alredy borrow",
-            },
-          ));
-    }
-
-    if (!db['category'][collection].containsKey(indexItem)) {
-      return Response(404,
-          body: json.encode(
-            {"message": 'the name index not found in colection $collection'},
-          ));
-    }
-    final borrowItem = db['category'][collection][indexItem];
-
-    final Map<String, Object> borrow = {
-      "status": "borrow",
-      "userName": nameUser,
-      "class": classUser,
-      "nameTeacher": nameTeacher,
-      "nisn": nisnUser,
-      "imageNisn": imageNisn ?? '-',
-      "imageSelfie": imageSelfie ?? '-',
-      "item": {}
-    };
-    db['borrowing'][nameUser] = borrow;
-
-    // Add the item to the user's borrowing collection without replacing existing items
-    db['borrowing'][nameUser]['item'][collection] ??= {};
-    db['borrowing'][nameUser]['item'][collection][indexItem] = borrowItem;
-    print(db['borrowing']);
-    return Response(200, body: json.encode({"userBorrow": nameUser}));
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(500, body: json.encode({"message": "$e", "s": "$s"}));
-  }
-}
-
-Future<Response> checkUserIsBorrow(Request req) async {
-  try {
-    final request = await req.readAsString();
-    final data = json.decode(request);
-    final dataUser = data['name'];
-
-    if (!db['borrowing'].containsKey(dataUser)) {
-      return Response(404, body: json.encode({"user": "not"}));
-    }
-    final user = db['borrowing'][dataUser];
-    print(db['borrowing']);
-    return Response(200, body: json.encode({"user": user}));
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(500,
-        body: json.encode({"message": "internal server error"}));
-  }
-}
-
-Future<Response> waithPermitAdmin(Request req) async {
-  try {
-    final request = await req.readAsString();
-    final data = json.decode(request);
-
-    final nameUser = data['nameUser'];
-
-    final pending = db['borrowing'][nameUser];
-    db['borrowing'][nameUser]['status'] = "pending";
-
-    db['pending'][nameUser] = pending;
-    db['pending'][nameUser]['status'] = 'wait permit';
-
-    print(db['pending']);
-    return Response(200, body: json.encode({"message": db['pending']}));
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(500,
-        body: json.encode({"message": "intenal server error"}));
-  }
-}
-
-Future<Response> granted(Request req) async {
-  try {
-    final request = await req.readAsString();
-    final data = json.decode(request);
-
-    final adminName = data['admin'];
-    final userName = data['nameUser'];
-    final dateTime = data['dateTime'];
-
-    final listItem = db['borrowing'][userName]["item"];
-    final pendingData = db['pending'][userName];
-    print(db['borrowing'][userName]["item"]);
-    db['itemBack'][userName] = pendingData;
-    db['itemBack'][userName]['verifikasi'] = adminName;
-    db['itemBack'][userName]['time'] = dateTime;
-    db['itemBack'][userName] = {
-      "item": listItem,
-    };
-    print("$listItem   -----");
-    db['borrowing'][userName]["item"].forEach((key, value) {
-      value.forEach((itemKey, itemValue) {
-        if (db['category'][key] != null) {
-          db['category'][key][itemKey]['status'] = "available";
+          case "getDataBorrow":
+            await getDataBorrow(
+              socket: socket,
+              collection: borrowing,
+            );
+            break;
+          case "getDataBorrowOnce":
+            await getDataBorrowOnce(
+              socket: socket,
+              collection: borrowing,
+            );
+            break;
+          case "getDataPending":
+            await getDataPending(
+              socket: socket,
+              collection: pending,
+            );
+            break;
+          case "getDataPendingOnce":
+            await getDataPendingOnce(
+              socket: socket,
+              collection: pending,
+            );
+            break;
+          case "getDataAllCollection":
+            getDataAllCategory(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          case "getDataAllCollectionOnce":
+            await getDataAllCategoryOnce(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          case "getDataCollectionAvaileble":
+            await getDataCategoryAvaileble(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          case "getDataCollectionAvailebleOnce":
+            await getDataCategoryAvailebleOnce(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          case "getDataGranted":
+            await getDataGranted(
+              socket: socket,
+              collection: itemBack,
+            );
+            break;
+          case "getDataGrantedOnce":
+            await getDataGrantedOnce(
+              socket: socket,
+              collection: itemBack,
+            );
+            break;
+          case "getAllKeyCategory":
+            await getAllKeyCategory(
+              collection: categoryColection,
+              socket: socket,
+            );
+            break;
+          case "getAllKeyCategoryOnce":
+            await getDataAllKeyCategoryOnce(
+              socket: socket,
+              collection: categoryColection,
+            );
+            break;
+          default:
+            socket.sink.add(json.encode(
+              {
+                "endpoint": "ERROR",
+                "error": "endpoint not found",
+              },
+            ));
         }
-      });
-    });
-    print(pendingData);
 
-    return Response(
-      200,
-      body: json.encode(
-        {
-          "message": db['itemBack'][userName],
-          "item": db['borrowing'][userName]['item']
-        },
-      ),
-    );
-  } catch (e, s) {
-    print(e);
-    print(s);
-    return Response(500, body: json.encode({"message": "$e", "s": "$s"}));
-  }
+        int end1 = DateTime.now().millisecondsSinceEpoch;
+        int result1 = start1 - end1;
+        print(('$result1 execution code time handelWs'));
+        dev.log("Active connections: ${channel.length}");
+      } catch (e, s) {
+        dev.log("Connections Is : $e");
+        dev.log("Connections Is : $s");
+        print(s);
+      }
+    },
+    onDone: () {
+      dev.log("client close");
+      channel.clear();
+      dataBase.close();
+    },
+    onError: (e) {
+      dev.log("on error $e");
+      channel.clear();
+      dataBase.close();
+    },
+  );
 }
 
 void main(List<String> args) async {
-  // Use any available host or container IP (usually `0.0.0.0`).
-  final ip = InternetAddress.anyIPv4;
+  try {
+    final int port = 8080;
+    final server = await HttpServer.bind("127.0.0.1", port);
+    print('webSocker listening on ws:/${server.port}');
+    print("port ${server.address}");
 
-  // Configure a pipeline that logs requests.
-  final handler =
-      Pipeline().addMiddleware(logRequests()).addHandler(_router.call);
+    final Db dataBase = Db('mongodb://localhost:27017/inventory');
+    await for (HttpRequest request in server) {
+      try {
+        if (request.uri.path == '/ws') {
+          final socket = await WebSocketTransformer.upgrade(request);
+          final chanel = IOWebSocketChannel(socket);
 
-  // For running in containers, we respect the PORT environment variable.
-  final port = int.parse(Platform.environment['PORT'] ?? '8080');
-  final server = await serve(handler, ip, port);
-  print('Server listening on port ${server.port}');
+          handleWebSocket(chanel, dataBase);
+        } else {
+          request.response
+            ..statusCode = HttpStatus.forbidden
+            ..close();
+        }
+      } catch (e, s) {
+        print(e);
+        print(s);
+      }
+    }
+
+    print("done");
+  } catch (e, s) {
+    print(e);
+    print(s);
+  }
 }

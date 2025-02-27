@@ -12,6 +12,7 @@ dependencies:
   shelf_router: ^1.1.0
   mongo_dart: ^0.10.3
   dart_jsonwebtoken: ^2.14.1
+  web_socket_channel: ^3.0.1
   
 
 dev_dependencies:
