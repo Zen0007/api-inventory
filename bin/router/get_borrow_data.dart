@@ -16,41 +16,27 @@ Future<void> getDataBorrow({
       return; // prevent for exsecute code below
     }
 
-    final pipeline = <Map<String, Object>>[];
+    final pipeline = [
+      {
+        "\$match": {
+          'operationType': {
+            '\$in': ['insert', 'update', 'delete']
+          }
+        }
+      }
+    ];
     final watch = collection.watch(pipeline);
 
     watch.listen((status) async {
       final updateData = await collection.find().toList();
-      if (status.isUpdate) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": updateData,
-            },
-          ),
-        );
-      }
-      if (status.isInsert) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": updateData,
-            },
-          ),
-        );
-      }
-      if (status.isDelete) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": updateData,
-            },
-          ),
-        );
-      }
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            "message": updateData,
+          },
+        ),
+      );
     });
   } catch (e, s) {
     print(e);

@@ -80,7 +80,7 @@ Future<void> granted({
       update time and add admin 
     */
     final update = {
-      r'$set': {
+      '\$set': {
         '$userName.status': "has return",
         '$userName.time': "$dateTime",
         '$userName.admin': "$adminName",

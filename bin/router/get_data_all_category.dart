@@ -16,16 +16,24 @@ Future<void> getDataAllCategory({
       return; // prevent for exsecute code below
     }
 
-    final List<Map<String, Object>> pipeline = [];
+    final pipeline = [
+      {
+        "\$match": {
+          'operationType': {
+            '\$in': ['insert', 'update', 'delete']
+          }
+        }
+      }
+    ];
     final watch = collection.watch(pipeline);
-    print("send data");
-    watch.listen((status) async {
-      print("status delete \t  ${status.isDelete}");
-      print("status update \t  ${status.isUpdate}");
-      print("status insert \t  ${status.isInsert}");
-      final updateData = await collection.find().toList();
 
-      if (status.isUpdate) {
+    watch.listen(
+      (status) async {
+        print("status delete \t  ${status.isDelete}");
+        print("status update \t  ${status.isUpdate}");
+        print("status insert \t  ${status.isInsert}");
+        final updateData = await collection.find().toList();
+
         socket.sink.add(
           json.encode(
             {
@@ -34,28 +42,8 @@ Future<void> getDataAllCategory({
             },
           ),
         );
-      }
-      if (status.isInsert) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": updateData,
-            },
-          ),
-        );
-      }
-      if (status.isDelete) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": updateData,
-            },
-          ),
-        );
-      }
-    });
+      },
+    );
   } catch (e, s) {
     print(e);
     print(s);

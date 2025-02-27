@@ -67,7 +67,15 @@ Future<void> getAllKeyCategory({
   }
 
   try {
-    final List<Map<String, Object>> pipeline = [];
+    final pipeline = [
+      {
+        "\$match": {
+          'operationType': {
+            '\$in': ['insert', 'update', 'delete']
+          }
+        }
+      }
+    ];
     final watch = collection.watch(pipeline);
 
     watch.listen((status) async {
@@ -84,36 +92,14 @@ Future<void> getAllKeyCategory({
           },
         );
       }
-      if (status.isUpdate) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": list,
-            },
-          ),
-        );
-      }
-      if (status.isInsert) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": list,
-            },
-          ),
-        );
-      }
-      if (status.isDelete) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": list,
-            },
-          ),
-        );
-      }
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            "message": list,
+          },
+        ),
+      );
     });
   } catch (e, s) {
     print(e);

@@ -74,7 +74,15 @@ Future<void> getDataCategoryAvaileble({
       return; // prevent for exsecute code below
     }
 
-    final List<Map<String, Object>> pipeline = [];
+    final pipeline = [
+      {
+        "\$match": {
+          'operationType': {
+            '\$in': ['insert', 'update', 'delete']
+          }
+        }
+      }
+    ];
     final watch = collection.watch(pipeline);
 
     watch.listen((status) async {
@@ -109,36 +117,14 @@ Future<void> getDataCategoryAvaileble({
           filteredData.add(filteredItem);
         }
       }
-      if (status.isUpdate) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": filteredData,
-            },
-          ),
-        );
-      }
-      if (status.isInsert) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": filteredData,
-            },
-          ),
-        );
-      }
-      if (status.isDelete) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": filteredData,
-            },
-          ),
-        );
-      }
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            "message": filteredData,
+          },
+        ),
+      );
     });
   } catch (e, s) {
     print('$e get data availeble');

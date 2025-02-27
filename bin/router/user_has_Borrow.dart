@@ -18,42 +18,28 @@ Future<void> userHasBorrow({
       return; // prevent if name user in local storage is emptry
     }
 
-    final List<Map<String, Object>> pipeline = [];
+    final pipeline = [
+      {
+        "\$match": {
+          'operationType': {
+            '\$in': ['insert', 'update', 'delete']
+          }
+        }
+      }
+    ];
     final watch = collection.watch(pipeline);
 
     watch.listen((status) async {
       final updateData = await collection.findOne(where.exists(dataUser));
 
-      if (status.isUpdate) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": updateData,
-            },
-          ),
-        );
-      }
-      if (status.isInsert) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": updateData,
-            },
-          ),
-        );
-      }
-      if (status.isDelete) {
-        socket.sink.add(
-          json.encode(
-            {
-              endpoint: valueEdnpoint,
-              "message": updateData,
-            },
-          ),
-        );
-      }
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            "message": updateData,
+          },
+        ),
+      );
     });
   } catch (e, s) {
     print(e);
