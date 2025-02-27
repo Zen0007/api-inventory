@@ -15,6 +15,8 @@ Future<void> waithPermitAdmin({
 }) async {
   try {
     final String nameUser = payload['name'];
+    // final objectId = ObjectId.fromHexString(nameUser);
+
     if (nameUser.isEmpty) {
       return;
     }
@@ -43,8 +45,14 @@ Future<void> waithPermitAdmin({
     final updateStatus = await pending.findOne(where.exists(nameUser));
 
     if (updateStatus == null) {
-      socket.sink
-          .add(json.encode({endpoint: valueEdnpoint, warning: "failed"}));
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            warning: "failed",
+          },
+        ),
+      );
       return;
     }
 
