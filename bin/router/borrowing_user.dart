@@ -40,6 +40,18 @@ Future<void> borrowingItem({
       ));
       return;
     }
+    final chekUserHasExist = await collection.findOne(where.exists(nameUser));
+
+    if (chekUserHasExist != null) {
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEndpoint,
+            warning: "user already exists",
+          },
+        ),
+      );
+    }
 
     if (imageSelfie.isEmpty) {
       socket.sink.add(json.encode(
