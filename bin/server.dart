@@ -12,14 +12,13 @@ import 'router/delete_category.dart';
 import 'router/delete_gratend_user.dart';
 import 'router/update_status.dart';
 import 'router/borrowing_user.dart';
-import 'router/wait_permision.dart';
+import 'router/pending.dart';
 import 'router/get_user_granted.dart';
 import 'router/get_borrow_data.dart';
 import 'router/get_pending_data.dart';
 import 'router/get_key_collection.dart';
 import 'router/get_category_data.dart';
 import 'router/add_new_collection.dart';
-import 'router/chek_user_has_borrow.dart';
 import 'router/get_data_all_category.dart';
 import 'router/user_has_borrow.dart';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -77,86 +76,102 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
               socket: socket,
             );
             break;
-          case "newCollection":
+          case "newCollection": // it work so not have call endpoint for get data
+            getAllKeyCategory(collection: categoryColection, socket: socket);
+
             await addNewCollection(
               socket: socket,
               payload: payload,
               collection: categoryColection,
             );
             break;
-          case "newItem":
+          case "newItem": // it work so not have call endpoint for get data
+            getDataCategoryAvaileble(
+              socket: socket,
+              collection: categoryColection,
+            );
+            getDataAllCategory(socket: socket, collection: categoryColection);
+
             await addItemToInventory(
               socket: socket,
               payload: payload,
               collection: categoryColection,
             );
             break;
-          case "deleteItem":
+          case "deleteItem": // it work so not have call endpoint for get data
+            getDataCategoryAvaileble(
+                socket: socket, collection: categoryColection);
+            getDataAllCategory(socket: socket, collection: categoryColection);
+
             await deleteItem(
               socket: socket,
               collection: categoryColection,
               payload: payload,
             );
             break;
-          case "deleteCategory":
+          case "deleteCategory": // it work so not have call endpoint for get data
+            getAllKeyCategory(collection: categoryColection, socket: socket);
+
             await deleteCategory(
               socket: socket,
               collection: categoryColection,
               payload: payload,
             );
             break;
-          case 'deleteUserGratend':
+          case 'deleteUserGratend': // it work so not have call endpoint for get data
+            getDataGranted(socket: socket, collection: itemBack);
+
             await deleteUserGratend(
               socket: socket,
               collection: itemBack,
               payload: payload,
             );
             break;
-          case "updateStatusItem":
+          case "updateStatusItem": // it work so not have call endpoint for get data
+            getDataCategoryAvaileble(
+                socket: socket, collection: categoryColection);
+            getDataAllCategory(socket: socket, collection: categoryColection);
+
             await updateStatusItem(
               socket: socket,
               collection: categoryColection,
               payload: payload,
             );
             break;
-          case "borrowing":
+          case "borrowing": // it work so not have call endpoint for get data
+            getDataBorrow(
+              socket: socket,
+              collection: borrowing,
+            );
+
             await borrowingItem(
               socket: socket,
-              dataBase: dataBase,
               collection: borrowing,
               payload: payload,
             );
+
             break;
-          case "checkUserBorrow":
-            await checkUserIsBorrow(
-              socket: socket,
-              payload: payload,
-              collection: borrowing,
-            );
-            break;
-          case "hasBorrow":
-            await userHasBorrow(
-              socket: socket,
-              payload: payload,
-              collection: borrowing,
-            );
-            break;
-          case "hasBorrowOnce":
-            await userHasBorrowOnce(
-              socket: socket,
-              payload: payload,
-              collection: borrowing,
-            );
-            break;
-          case "waitPermision":
+          case "waitPermision": // it work so not have call endpoint for get data
+            getDataPending(socket: socket, collection: pending);
+            userHasBorrow(
+                socket: socket, payload: payload, collection: borrowing);
+            getDataBorrow(socket: socket, collection: borrowing);
+
             await waithPermitAdmin(
               socket: socket,
               payload: payload,
               borrowing: borrowing,
               pending: pending,
             );
+
             break;
-          case "granted":
+          case "granted": // it work so not have call endpoint for get data
+            getDataPending(socket: socket, collection: pending);
+            getDataBorrow(socket: socket, collection: borrowing);
+            getDataGranted(socket: socket, collection: itemBack);
+            userHasBorrow(
+                socket: socket, payload: payload, collection: borrowing);
+
             await granted(
               socket: socket,
               category: categoryColection,
@@ -167,76 +182,97 @@ void handleWebSocket(WebSocketChannel socket, Db dataBase) async {
             );
             break;
 
-          case "getDataBorrow":
-            await getDataBorrow(
-              socket: socket,
-              collection: borrowing,
-            );
-            break;
+          // case "getDataBorrow":
+          //   await getDataBorrow(
+          //     socket: socket,
+          //     collection: borrowing,
+          //   );
+          //   break;
           case "getDataBorrowOnce":
             await getDataBorrowOnce(
               socket: socket,
               collection: borrowing,
             );
             break;
-          case "getDataPending":
-            await getDataPending(
-              socket: socket,
-              collection: pending,
-            );
-            break;
+          // case "getDataPending":
+          //   await getDataPending(
+          //     socket: socket,
+          //     collection: pending,
+          //   );
+          //   break;
           case "getDataPendingOnce":
             await getDataPendingOnce(
               socket: socket,
               collection: pending,
             );
             break;
-          case "getDataAllCollection":
-            getDataAllCategory(
-              socket: socket,
-              collection: categoryColection,
-            );
-            break;
+          // case "getDataAllCollection":
+          //   getDataAllCategory(
+          //     socket: socket,
+          //     collection: categoryColection,
+          //   );
+          //   break;
           case "getDataAllCollectionOnce":
             await getDataAllCategoryOnce(
               socket: socket,
               collection: categoryColection,
             );
             break;
-          case "getDataCollectionAvaileble":
-            await getDataCategoryAvaileble(
-              socket: socket,
-              collection: categoryColection,
-            );
-            break;
+          // case "getDataCollectionAvaileble":
+          //   await getDataCategoryAvaileble(
+          //     socket: socket,
+          //     collection: categoryColection,
+          //   );
+          //   break;
           case "getDataCollectionAvailebleOnce":
             await getDataCategoryAvailebleOnce(
               socket: socket,
               collection: categoryColection,
             );
             break;
-          case "getDataGranted":
-            await getDataGranted(
-              socket: socket,
-              collection: itemBack,
-            );
-            break;
+          // case "getDataGranted":
+          //   await getDataGranted(
+          //     socket: socket,
+          //     collection: itemBack,
+          //   );
+          //   break;
           case "getDataGrantedOnce":
             await getDataGrantedOnce(
               socket: socket,
               collection: itemBack,
             );
             break;
-          case "getAllKeyCategory":
-            await getAllKeyCategory(
-              collection: categoryColection,
-              socket: socket,
-            );
-            break;
+          // case "getAllKeyCategory":
+          //   await getAllKeyCategory(
+          //     collection: categoryColection,
+          //     socket: socket,
+          //   );
+          //   break;
           case "getAllKeyCategoryOnce":
             await getDataAllKeyCategoryOnce(
               socket: socket,
               collection: categoryColection,
+            );
+            break;
+          // case "checkUserBorrow":
+          //   await checkUserIsBorrow(
+          //     socket: socket,
+          //     payload: payload,
+          //     collection: borrowing,
+          //   );
+          //   break;
+          // case "hasBorrow":
+          //   await userHasBorrow(
+          //     socket: socket,
+          //     payload: payload,
+          //     collection: borrowing,
+          //   );
+          //   break;
+          case "hasBorrowOnce":
+            await userHasBorrowOnce(
+              socket: socket,
+              payload: payload,
+              collection: borrowing,
             );
             break;
           default:
