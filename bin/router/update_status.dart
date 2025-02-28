@@ -17,9 +17,8 @@ Future<void> updateStatusItem({
     final indexItem = payload['index'];
 
     final findIndex = await collection.findOne(where.exists(nameCategory));
-
-    if (findIndex![nameCategory][indexItem] == null) {
-      return socket.sink.add(
+    if (findIndex == null) {
+      socket.sink.add(
         json.encode(
           {
             endpoint: valueEdnpoint,
@@ -27,6 +26,18 @@ Future<void> updateStatusItem({
           },
         ),
       );
+      return;
+    }
+    if (findIndex[nameCategory][indexItem] == null) {
+      socket.sink.add(
+        json.encode(
+          {
+            endpoint: valueEdnpoint,
+            "message": "failed to update status",
+          },
+        ),
+      );
+      return;
     }
 
     final updateStatusItem = await collection.updateOne(

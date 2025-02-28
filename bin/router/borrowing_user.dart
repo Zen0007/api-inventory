@@ -10,7 +10,6 @@ const String valueEndpoint = "BORROWING";
 
 Future<void> borrowingItem({
   required WebSocketChannel socket,
-  required Db dataBase,
   required DbCollection collection,
   required dynamic payload,
 }) async {
@@ -51,13 +50,14 @@ Future<void> borrowingItem({
           },
         ),
       );
+      return;
     }
 
     if (imageSelfie.isEmpty) {
       socket.sink.add(json.encode(
         {
           endpoint: valueEndpoint,
-          warning: "image kosong",
+          warning: "image empty",
         },
       ));
       return;
@@ -72,9 +72,7 @@ Future<void> borrowingItem({
       ));
       return;
     }
-
-    // Send data to Database
-    final sendData = await collection.insertOne({
+    await collection.insert({
       nameUser: {
         "name": nameUser,
         "status": "borrow",
@@ -82,33 +80,21 @@ Future<void> borrowingItem({
         "nisn": nisnUser,
         "nameTeacher": nameTeacher,
         "imageSelfie": imageSelfie,
-        "imageNisn": imageNisn ?? '[]',
+        "imageNisn": imageNisn ?? [],
         "time": timeBorrow,
         "admin": "",
         "items": item,
       }
     });
 
-    if (sendData.isSuccess) {
-      socket.sink.add(
-        json.encode(
-          {
-            endpoint: valueEndpoint,
-            "message": "success",
-          },
-        ),
-      );
-      return;
-    } else {
-      socket.sink.add(
-        json.encode(
-          {
-            endpoint: valueEndpoint,
-            warning: "failed while borrow",
-          },
-        ),
-      );
-    }
+    socket.sink.add(
+      json.encode(
+        {
+          endpoint: valueEndpoint,
+          "message": "success",
+        },
+      ),
+    );
   } catch (e, s) {
     print(e);
     print(s);
