@@ -12,10 +12,6 @@ Future<void> getDataPending({
   required DbCollection collection,
 }) async {
   try {
-    final data = await collection.find().toList();
-    if (data.isEmpty) {
-      return; // prevent for exsecute code below
-    }
     final pipeline = [
       {
         "\$match": {

@@ -11,16 +11,11 @@ Future<void> getDataBorrow({
   required DbCollection collection,
 }) async {
   try {
-    final data = await collection.find().toList();
-    if (data.isEmpty) {
-      return; // prevent for exsecute code below
-    }
-
     final pipeline = [
       {
         "\$match": {
           'operationType': {
-            '\$in': ['insert', 'update', 'delete']
+            '\$in': ['update', 'insert', 'delete']
           }
         }
       }
@@ -28,6 +23,9 @@ Future<void> getDataBorrow({
     final watch = collection.watch(pipeline);
 
     watch.listen((status) async {
+      print("status delete  \t  ${status.isDelete}");
+      print("status update  \t  ${status.isUpdate}");
+      print("status insert  \t  ${status.isInsert}");
       final updateData = await collection.find().toList();
       socket.sink.add(
         json.encode(

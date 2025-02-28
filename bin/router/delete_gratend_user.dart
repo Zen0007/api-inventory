@@ -34,7 +34,7 @@ Future<void> deleteUserGratend({
       }));
       return;
     }
-    print(findIndex);
+
     final deleteItem = await collection.deleteOne(where.id(findIndex["_id"]));
 
     if (deleteItem.isSuccess) {

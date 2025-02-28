@@ -61,11 +61,6 @@ Future<void> getAllKeyCategory({
   required WebSocketChannel socket,
   required DbCollection collection,
 }) async {
-  final data = await collection.find().toList();
-  if (data.isEmpty) {
-    return; // prevent for exsecute code below
-  }
-
   try {
     final pipeline = [
       {
