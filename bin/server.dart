@@ -39,6 +39,7 @@ void main(List<String> args) async {
         print(s);
       } finally {
         dev.log("finnaly was complate");
+        print("finnaly was complate");
       }
     }
 

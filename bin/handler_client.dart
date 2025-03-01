@@ -337,6 +337,7 @@ void handleWebSocket(
     dev.log("error $e");
   } finally {
     dev.log("connect is complate");
+    print("connections client is complate");
     pooling.release(dataBase);
   }
 }
