@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_pool/mongo_pool.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 const String endpoint = 'endpoint';
@@ -9,7 +9,7 @@ const String valueEdnpoint = "GETDATAPENDING";
 
 Future<void> getDataPending({
   required WebSocketChannel socket,
-  required DbCollection collection,
+  required DbCollection pending,
 }) async {
   try {
     final pipeline = [
@@ -21,11 +21,11 @@ Future<void> getDataPending({
         }
       }
     ];
-    final watch = collection.watch(pipeline);
+    final watch = pending.watch(pipeline);
 
     watch.listen(
       (status) async {
-        final updateData = await collection.find().toList();
+        final updateData = await pending.find().toList();
         socket.sink.add(
           json.encode(
             {
@@ -44,10 +44,11 @@ Future<void> getDataPending({
 
 Future<void> getDataPendingOnce({
   required WebSocketChannel socket,
-  required DbCollection collection,
+  required DbCollection pending,
 }) async {
   try {
-    final getData = await collection.find().toList();
+    final getData = await pending.find().toList();
+
     socket.sink.add(json.encode(
       {
         endpoint: valueEdnpoint,

@@ -1,16 +1,14 @@
 import 'dart:convert';
 
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_pool/mongo_pool.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 const String endpoint = 'endpoint';
 const String warning = 'warning';
 const String valueEdnpoint = "GETDATAGRANTED";
 
-Future<void> getDataGranted({
-  required WebSocketChannel socket,
-  required DbCollection collection,
-}) async {
+Future<void> getDataGranted(
+    {required WebSocketChannel socket, required DbCollection itemBack}) async {
   try {
     final pipeline = [
       {
@@ -21,19 +19,21 @@ Future<void> getDataGranted({
         }
       }
     ];
-    final watch = collection.watch(pipeline);
+    final watch = itemBack.watch(pipeline);
 
-    watch.listen((status) async {
-      final updateData = await collection.find().toList();
-      socket.sink.add(
-        json.encode(
-          {
-            endpoint: valueEdnpoint,
-            "message": updateData,
-          },
-        ),
-      );
-    });
+    watch.listen(
+      (status) async {
+        final updateData = await itemBack.find().toList();
+        socket.sink.add(
+          json.encode(
+            {
+              endpoint: valueEdnpoint,
+              "message": updateData,
+            },
+          ),
+        );
+      },
+    );
   } catch (e, s) {
     print(e);
     print(s);
@@ -42,10 +42,10 @@ Future<void> getDataGranted({
 
 Future<void> getDataGrantedOnce({
   required WebSocketChannel socket,
-  required DbCollection collection,
+  required DbCollection itemBack,
 }) async {
   try {
-    final getData = await collection.find().toList();
+    final getData = await itemBack.find().toList();
     socket.sink.add(
       json.encode(
         {

@@ -1,6 +1,7 @@
 // ignore: file_names
 import 'dart:convert';
-import 'package:mongo_dart/mongo_dart.dart';
+
+import 'package:mongo_pool/mongo_pool.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 const String endpoint = 'endpoint';
@@ -10,7 +11,7 @@ const String valueEdnpoint = "HASBORROW";
 Future<void> userHasBorrow({
   required WebSocketChannel socket,
   required dynamic payload,
-  required DbCollection collection,
+  required DbCollection borrowing,
 }) async {
   try {
     final String dataUser = payload['name'];
@@ -27,10 +28,10 @@ Future<void> userHasBorrow({
         }
       }
     ];
-    final watch = collection.watch(pipeline);
+    final watch = borrowing.watch(pipeline);
 
     watch.listen((status) async {
-      final updateData = await collection.findOne(where.exists(dataUser));
+      final updateData = await borrowing.findOne(where.exists(dataUser));
 
       socket.sink.add(
         json.encode(
@@ -50,14 +51,14 @@ Future<void> userHasBorrow({
 Future<void> userHasBorrowOnce({
   required WebSocketChannel socket,
   required dynamic payload,
-  required DbCollection collection,
+  required DbCollection borrowing,
 }) async {
   try {
     final String dataUser = payload['name'];
     if (dataUser.isEmpty) {
       return; // prevent if name user in local storage is emptry
     }
-    final result = await collection.findOne(where.exists(dataUser));
+    final result = await borrowing.findOne(where.exists(dataUser));
 
     if (result != null) {
       socket.sink.add(

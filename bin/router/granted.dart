@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_pool/mongo_pool.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 const String endpoint = 'endpoint';
@@ -9,11 +9,11 @@ const String valueEdnpoint = "GRANTED";
 
 Future<void> granted({
   required WebSocketChannel socket,
-  required DbCollection category,
-  required DbCollection pending,
-  required DbCollection borrow,
-  required DbCollection itemBack,
   required dynamic payload,
+  required DbCollection borrowing,
+  required DbCollection itemBack,
+  required DbCollection pending,
+  required DbCollection categoryColection,
 }) async {
   try {
     final adminName = payload['admin'];
@@ -21,7 +21,7 @@ Future<void> granted({
     final dateTime = payload['dateTime'];
 
     final findUserInPending = await pending.findOne(where.exists(userName));
-    final findUserBorrow = await borrow.findOne(where.exists(userName));
+    final findUserBorrow = await borrowing.findOne(where.exists(userName));
 
     if (findUserBorrow == null || findUserInPending == null) {
       socket.sink.add(json.encode(
@@ -63,11 +63,12 @@ Future<void> granted({
       final index = status['index'];
 
       //    this code to get data in collection category
-      final categoryItem = await category.findOne(where.exists(categoryName));
+      final categoryItem =
+          await categoryColection.findOne(where.exists(categoryName));
 
       if (categoryItem != null) {
         // update status items in collection category
-        await category.updateOne(
+        await categoryColection.updateOne(
           where
               .id(categoryItem["_id"])
               .eq("$categoryName.$index", {"\$exists": true}),
@@ -94,7 +95,7 @@ Future<void> granted({
         and in collection pending must be clean 
     */
     final deleteBorrow =
-        await borrow.deleteOne(where.id(findUserBorrow['_id']));
+        await borrowing.deleteOne(where.id(findUserBorrow['_id']));
 
     final deletePending =
         await pending.deleteOne(where.id(findUserInPending["_id"]));

@@ -78,6 +78,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.3"
+  cached_annotation:
+    dependency: transitive
+    description:
+      name: cached_annotation
+      sha256: d3ce9cf914ed64a4328bae5708367e727ad7f9188bcf954b63dbd49ef248f72f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.7.0"
   clock:
     dependency: transitive
     description:
@@ -287,7 +295,7 @@ packages:
     source: hosted
     version: "2.0.0"
   mongo_dart:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: mongo_dart
       sha256: "5e94f2f7fc779eeab677afd5d98dc63f1f35a6adb4629d4b9d25028a4d06fd21"
@@ -302,6 +310,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.2"
+  mongo_pool:
+    dependency: "direct main"
+    description:
+      name: mongo_pool
+      sha256: d1ae953bc889be5fdce75f546750da25cd97d0fd6a5d25480cab0b40a9196f21
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.3"
   node_preamble:
     dependency: transitive
     description:
@@ -542,6 +558,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.5.1"
+  very_good_analysis:
+    dependency: transitive
+    description:
+      name: very_good_analysis
+      sha256: "1fb637c0022034b1f19ea2acb42a3603cbd8314a470646a59a2fb01f5f3a8629"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.0"
   vm_service:
     dependency: transitive
     description:

@@ -1,33 +1,23 @@
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:mongo_pool/mongo_pool.dart';
 
 class DatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
-  Db? _db;
+  final pooling = MongoDbPoolService(
+    MongoPoolConfiguration(
+      poolSize: 5,
+      uriString: 'mongodb://localhost:27017/inventory',
+      leakDetectionThreshold: 10000,
+      maxLifetimeMilliseconds: 180000,
+      secure: false,
+      tlsAllowInvalidCertificates: false,
+    ),
+  );
 
-  // Factory constructor to return the same instance
-  factory DatabaseHelper() {
-    return _instance;
-  }
-
-  // Private internal constructor
-  DatabaseHelper._internal();
-
-  Future<Db> get db async {
-    if (_db == null) {
-      _db = Db('mongodb://localhost:27017/inventory');
-      await _db!.open();
-    }
-
-    if (_db!.state != State.closed) {
-      await _db!.open();
-    }
-    print(_db!.isConnected);
-    return _db!;
-  }
-
-  Future<void> close() async {
-    if (_db != null && _db!.state == State.open) {
-      await _db!.close();
+  Future<void> initialize(MongoDbPoolService service) async {
+    try {
+      await service.initialize();
+    } on Exception catch (e, s) {
+      print(e);
+      print(s);
     }
   }
 }

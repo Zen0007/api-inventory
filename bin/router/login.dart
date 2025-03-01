@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
-import 'package:mongo_dart/mongo_dart.dart';
+
+import 'package:mongo_pool/mongo_pool.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 const String endpoint = 'endpoint';
@@ -10,7 +11,7 @@ const String valueEdnpoint = "LOGIN";
 Future<void> login({
   required dynamic data,
   required WebSocketChannel socket,
-  required DbCollection collection,
+  required DbCollection authAdmin,
 }) async {
   try {
     final String? userName = data['name'];
@@ -26,7 +27,7 @@ Future<void> login({
       return;
     }
 
-    final findUser = await collection.findOne(where.exists(userName));
+    final findUser = await authAdmin.findOne(where.exists(userName));
 
     if (findUser == null) {
       socket.sink.add(json.encode(
