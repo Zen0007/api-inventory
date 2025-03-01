@@ -9,7 +9,7 @@ void main(List<String> args) async {
     final pooling = MongoDbPoolService(
       MongoPoolConfiguration(
         poolSize: 100,
-        uriString: 'mongodb://localhost:27017/inventory',
+        uriString: 'mongodb://db_mongo:27017/inventory',
         leakDetectionThreshold: 120000,
         maxLifetimeMilliseconds: 180000,
         secure: false,
