@@ -1,39 +1,39 @@
+import 'dart:convert';
 import 'dart:io';
-
-import 'package:http/http.dart';
 import 'package:test/test.dart';
+import 'package:web_socket_channel/io.dart';
+
+Future<int> _findAvailablePort() async {
+  final server = await ServerSocket.bind(InternetAddress.anyIPv4, 0);
+  print(server.port);
+  final port = server.port;
+  await server.close();
+  return port;
+}
 
 void main() {
-  final port = '8080';
-  final host = 'http://0.0.0.0:$port';
-  late Process p;
+  late IOWebSocketChannel channels;
 
-  setUp(() async {
-    p = await Process.start(
-      'dart',
-      ['run', 'bin/server.dart'],
-      environment: {'PORT': port},
-    );
-    // Wait for server to start and print to stdout.
-    await p.stdout.first;
-  });
+  setUp(
+    () {
+      channels = IOWebSocketChannel.connect('ws://localhost:8080/ws');
+    },
+  );
 
-  tearDown(() => p.kill());
+  test(
+    "test endpoint",
+    () async {
+      channels.sink.add(
+        jsonEncode(
+          {
+            "endpoint": "newCollection",
+            "data": {"category": "pc"}
+          },
+        ),
+      );
 
-  test('Root', () async {
-    final response = await get(Uri.parse('$host/'));
-    expect(response.statusCode, 200);
-    expect(response.body, 'Hello, World!\n');
-  });
-
-  test('Echo', () async {
-    final response = await get(Uri.parse('$host/echo/hello'));
-    expect(response.statusCode, 200);
-    expect(response.body, 'hello\n');
-  });
-
-  test('404', () async {
-    final response = await get(Uri.parse('$host/foobar'));
-    expect(response.statusCode, 404);
-  });
+      final res = await channels.stream.first;
+      print(res);
+    },
+  );
 }

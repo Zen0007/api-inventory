@@ -9,7 +9,7 @@ void main(List<String> args) async {
     final pooling = MongoDbPoolService(
       MongoPoolConfiguration(
         poolSize: 100,
-        uriString: 'mongodb://db_mongo:27017/inventory',
+        uriString: 'mongodb://localhost:27017/inventory',
         leakDetectionThreshold: 120000,
         maxLifetimeMilliseconds: 180000,
         secure: false,
@@ -18,8 +18,7 @@ void main(List<String> args) async {
     );
     await initializePooling(pooling);
 
-    final int port = 8080;
-    final server = await HttpServer.bind("127.0.0.1", port);
+    final server = await HttpServer.bind("0.0.0.0", 8080);
     print('webSocker listening on ws:/${server.port}');
     print("port ${server.address}");
     await for (HttpRequest request in server) {
